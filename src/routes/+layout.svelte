@@ -1,0 +1,210 @@
+<script lang="ts">
+  import '../app.css';
+  import { page } from '$app/stores';
+  import { appStore, currentUser, unreadNotificationsCount } from '$lib/store';
+
+  let { children } = $props();
+
+  const navItems = [
+    { href: '/', label: 'Browse', icon: '🔍' },
+    { href: '/dashboard', label: 'Dashboard', icon: '📊' },
+    { href: '/my-items', label: 'My Items', icon: '📦' },
+    { href: '/tags', label: 'Tags', icon: '🏷️' }
+  ];
+</script>
+
+<div class="app">
+  <nav class="navbar">
+    <div class="container nav-content">
+      <a href="/" class="logo">
+        <span class="logo-icon">📚</span>
+        <span class="logo-text">Library of Things</span>
+      </a>
+
+      <div class="nav-links">
+        {#each navItems as item}
+          <a
+            href={item.href}
+            class="nav-link"
+            class:active={$page.url.pathname === item.href}
+          >
+            <span>{item.icon}</span>
+            <span>{item.label}</span>
+          </a>
+        {/each}
+      </div>
+
+      <div class="nav-actions">
+        <a href="/notifications" class="notification-btn">
+          <span>🔔</span>
+          {#if $unreadNotificationsCount > 0}
+            <span class="notification-badge">{$unreadNotificationsCount}</span>
+          {/if}
+        </a>
+
+        {#if $currentUser}
+          <a href="/profile/{$currentUser.id}" class="user-avatar">
+            <img src={$currentUser.profilePic} alt={$currentUser.name} />
+          </a>
+        {/if}
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    {@render children()}
+  </main>
+</div>
+
+<style>
+  .app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .navbar {
+    background-color: var(--background);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    gap: 2rem;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    font-size: 1.75rem;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  @media (min-width: 640px) {
+    .logo-text {
+      display: inline;
+    }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all var(--transition);
+  }
+
+  .nav-link:hover {
+    background-color: var(--surface);
+    color: var(--text-primary);
+  }
+
+  .nav-link.active {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--primary);
+  }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .notification-btn {
+    position: relative;
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    font-size: 1.25rem;
+    transition: background-color var(--transition);
+  }
+
+  .notification-btn:hover {
+    background-color: var(--surface);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    background-color: var(--error);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 0.125rem 0.375rem;
+    border-radius: 9999px;
+    min-width: 1.125rem;
+    text-align: center;
+  }
+
+  .user-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--primary);
+    transition: transform var(--transition);
+  }
+
+  .user-avatar:hover {
+    transform: scale(1.1);
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 2rem 0;
+  }
+
+  @media (max-width: 640px) {
+    .nav-content {
+      gap: 0.5rem;
+    }
+
+    .nav-links {
+      gap: 0.25rem;
+    }
+
+    .nav-link span:last-child {
+      display: none;
+    }
+
+    .nav-link {
+      padding: 0.5rem;
+      font-size: 1.125rem;
+    }
+  }
+</style>

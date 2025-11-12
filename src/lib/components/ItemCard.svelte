@@ -1,0 +1,148 @@
+<script lang="ts">
+  import type { Item, User } from '$lib/types';
+  import { appStore } from '$lib/store';
+  import { derived } from 'svelte/store';
+
+  interface Props {
+    item: Item;
+  }
+
+  let { item }: Props = $props();
+
+  const owner = derived(appStore, ($state) =>
+    $state.users.find((u) => u.id === item.ownerId)
+  );
+</script>
+
+<a href="/items/{item.id}" class="item-card card">
+  <div class="item-image">
+    <img src={item.imageUrl} alt={item.name} />
+    {#if !item.available}
+      <div class="unavailable-badge">Currently Borrowed</div>
+    {/if}
+  </div>
+
+  <div class="item-content">
+    <h3 class="item-name">{item.name}</h3>
+
+    <div class="item-meta">
+      <div class="owner-info">
+        <img src={$owner?.profilePic} alt={$owner?.name} class="owner-avatar" />
+        <span class="owner-name">{$owner?.name}</span>
+      </div>
+
+      <div class="rating">
+        <span>⭐</span>
+        <span>{item.rating.toFixed(1)}</span>
+      </div>
+    </div>
+
+    <p class="item-description">{item.description.slice(0, 80)}...</p>
+
+    <div class="item-footer">
+      <span class="badge">{item.condition}</span>
+      <span class="borrows-count">{item.totalBorrows} borrows</span>
+    </div>
+  </div>
+</a>
+
+<style>
+  .item-card {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .item-image {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    background-color: var(--surface);
+  }
+
+  .item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition);
+  }
+
+  .item-card:hover .item-image img {
+    transform: scale(1.05);
+  }
+
+  .unavailable-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background-color: rgba(239, 68, 68, 0.95);
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .item-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+  }
+
+  .item-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .item-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .owner-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .owner-avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .owner-name {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .item-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .borrows-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,422 @@
+<script lang="ts">
+  import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
+  import Toast from '$lib/components/Toast.svelte';
+
+  let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
+  let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  function approveRequest(requestId: string) {
+    appStore.updateBorrowRequest(requestId, { status: 'approved' });
+    toast = { message: 'Request approved!', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
+  }
+
+  function denyRequest(requestId: string) {
+    appStore.updateBorrowRequest(requestId, { status: 'denied' });
+    toast = { message: 'Request denied', type: 'error' };
+    setTimeout(() => (toast = null), 3000);
+  }
+
+  function markAsReturned(requestId: string) {
+    // Show a simple completion flow
+    const rating = 5; // In a real app, this would be a form
+    const review = 'Item returned in good condition';
+    appStore.completeBorrow(requestId, rating, review);
+    toast = { message: 'Item marked as returned!', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
+  }
+</script>
+
+<div class="dashboard-page fade-in">
+  <div class="container">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Manage your lending activity</p>
+      </div>
+    </header>
+
+    <div class="dashboard-tabs">
+      <button
+        class="tab"
+        class:active={activeTab === 'incoming'}
+        onclick={() => (activeTab = 'incoming')}
+      >
+        <span>📥</span>
+        <span>Incoming Requests</span>
+        {#if $incomingRequests.length > 0}
+          <span class="tab-badge">{$incomingRequests.length}</span>
+        {/if}
+      </button>
+
+      <button
+        class="tab"
+        class:active={activeTab === 'outgoing'}
+        onclick={() => (activeTab = 'outgoing')}
+      >
+        <span>📤</span>
+        <span>My Requests</span>
+      </button>
+
+      <button
+        class="tab"
+        class:active={activeTab === 'active'}
+        onclick={() => (activeTab = 'active')}
+      >
+        <span>🔄</span>
+        <span>Active Loans</span>
+        {#if $activeLoans.length > 0}
+          <span class="tab-badge">{$activeLoans.length}</span>
+        {/if}
+      </button>
+    </div>
+
+    <div class="tab-content">
+      {#if activeTab === 'incoming'}
+        <div class="requests-list">
+          {#if $incomingRequests.length === 0}
+            <div class="empty-state">
+              <span class="empty-icon">📬</span>
+              <h3>No incoming requests</h3>
+              <p>When people request to borrow your items, they'll appear here</p>
+            </div>
+          {:else}
+            {#each $incomingRequests as request}
+              {@const item = $appStore.items.find((i) => i.id === request.itemId)}
+              {@const borrower = $appStore.users.find((u) => u.id === request.borrowerId)}
+              <div class="request-card card">
+                <div class="request-content">
+                  <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  <div class="request-details">
+                    <h3 class="request-title">{item?.name}</h3>
+                    <div class="request-meta">
+                      <img
+                        src={borrower?.profilePic}
+                        alt={borrower?.name}
+                        class="borrower-avatar"
+                      />
+                      <span class="borrower-name">{borrower?.name}</span>
+                      <span class="rating">⭐ {borrower?.rating.toFixed(1)}</span>
+                    </div>
+                    <div class="request-dates">
+                      <span>📅</span>
+                      <span
+                        >{new Date(request.startDate).toLocaleDateString()} - {new Date(
+                          request.endDate
+                        ).toLocaleDateString()}</span
+                      >
+                    </div>
+                    {#if request.message}
+                      <p class="request-message">"{request.message}"</p>
+                    {/if}
+                  </div>
+                </div>
+                <div class="request-actions">
+                  <button class="btn btn-primary" onclick={() => approveRequest(request.id)}>
+                    ✓ Approve
+                  </button>
+                  <button class="btn btn-secondary" onclick={() => denyRequest(request.id)}>
+                    ✗ Deny
+                  </button>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
+      {:else if activeTab === 'outgoing'}
+        <div class="requests-list">
+          {#if $outgoingRequests.length === 0}
+            <div class="empty-state">
+              <span class="empty-icon">📦</span>
+              <h3>No outgoing requests</h3>
+              <p>Requests you make to borrow items will appear here</p>
+            </div>
+          {:else}
+            {#each $outgoingRequests as request}
+              {@const item = $appStore.items.find((i) => i.id === request.itemId)}
+              {@const owner = $appStore.users.find((u) => u.id === request.ownerId)}
+              <div class="request-card card">
+                <div class="request-content">
+                  <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  <div class="request-details">
+                    <h3 class="request-title">{item?.name}</h3>
+                    <div class="request-meta">
+                      <span>Requested from</span>
+                      <img src={owner?.profilePic} alt={owner?.name} class="borrower-avatar" />
+                      <span class="borrower-name">{owner?.name}</span>
+                    </div>
+                    <div class="request-dates">
+                      <span>📅</span>
+                      <span
+                        >{new Date(request.startDate).toLocaleDateString()} - {new Date(
+                          request.endDate
+                        ).toLocaleDateString()}</span
+                      >
+                    </div>
+                    <div class="status-badge-inline">
+                      {#if request.status === 'pending'}
+                        <span class="badge badge-warning">⏳ Pending</span>
+                      {:else if request.status === 'approved'}
+                        <span class="badge badge-success">✓ Approved</span>
+                      {:else if request.status === 'denied'}
+                        <span class="badge badge-error">✗ Denied</span>
+                      {/if}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
+      {:else if activeTab === 'active'}
+        <div class="requests-list">
+          {#if $activeLoans.length === 0}
+            <div class="empty-state">
+              <span class="empty-icon">📋</span>
+              <h3>No active loans</h3>
+              <p>Items currently borrowed from you will appear here</p>
+            </div>
+          {:else}
+            {#each $activeLoans as loan}
+              {@const item = $appStore.items.find((i) => i.id === loan.itemId)}
+              {@const borrower = $appStore.users.find((u) => u.id === loan.borrowerId)}
+              <div class="request-card card">
+                <div class="request-content">
+                  <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  <div class="request-details">
+                    <h3 class="request-title">{item?.name}</h3>
+                    <div class="request-meta">
+                      <span>Borrowed by</span>
+                      <img
+                        src={borrower?.profilePic}
+                        alt={borrower?.name}
+                        class="borrower-avatar"
+                      />
+                      <span class="borrower-name">{borrower?.name}</span>
+                    </div>
+                    <div class="request-dates">
+                      <span>📅</span>
+                      <span
+                        >Return by: {new Date(loan.endDate).toLocaleDateString()}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="request-actions">
+                  <button class="btn btn-primary" onclick={() => markAsReturned(loan.id)}>
+                    Mark as Returned
+                  </button>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
+      {/if}
+    </div>
+  </div>
+</div>
+
+{#if toast}
+  <Toast message={toast.message} type={toast.type} onClose={() => (toast = null)} />
+{/if}
+
+<style>
+  .page-header {
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .page-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .dashboard-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+
+  .tab:hover {
+    color: var(--text-primary);
+    background-color: var(--surface);
+  }
+
+  .tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  .tab-badge {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .request-card {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .request-content {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+  }
+
+  .request-item-image {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    flex-shrink: 0;
+  }
+
+  .request-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+  }
+
+  .request-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .request-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .borrower-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .borrower-name {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .request-dates {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .request-message {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin: 0;
+    padding: 0.75rem;
+    background-color: var(--surface);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--primary);
+  }
+
+  .request-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .status-badge-inline {
+    margin-top: 0.5rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .empty-state p {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .request-card {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .request-content {
+      flex-direction: column;
+    }
+
+    .request-item-image {
+      width: 100%;
+      height: 200px;
+    }
+
+    .request-actions {
+      flex-direction: row;
+    }
+
+    .tab {
+      padding: 0.875rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    .tab span:nth-child(2) {
+      display: none;
+    }
+  }
+</style>
