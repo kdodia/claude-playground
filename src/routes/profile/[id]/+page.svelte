@@ -108,13 +108,15 @@
                 {@const wasBorrower = activity.borrowerId === userId}
                 {@const isActive = 'status' in activity && (activity.status === 'active' || activity.status === 'approved')}
                 <div class="history-item" class:active-item={isActive}>
-                  <img src={item?.imageUrl} alt={item?.name} class="history-item-image" />
+                  <a href="/items/{item?.id}" class="history-item-image-link">
+                    <img src={item?.imageUrl} alt={item?.name} class="history-item-image" />
+                  </a>
                   <div class="history-details">
                     <div class="history-action">
                       <span>{wasBorrower ? '📤 Borrowed' : '📥 Lent'}</span>
-                      <strong>{item?.name}</strong>
+                      <a href="/items/{item?.id}" class="history-link"><strong>{item?.name}</strong></a>
                       <span>{wasBorrower ? 'from' : 'to'}</span>
-                      <strong>{otherUser?.name}</strong>
+                      <a href="/profile/{otherUser?.id}" class="history-link"><strong>{otherUser?.name}</strong></a>
                       {#if isActive}
                         <span class="badge badge-success">Active</span>
                       {/if}
@@ -269,12 +271,23 @@
     border-left: 3px solid var(--primary);
   }
 
+  .history-item-image-link {
+    display: block;
+    flex-shrink: 0;
+    transition: opacity var(--transition);
+  }
+
+  .history-item-image-link:hover {
+    opacity: 0.8;
+  }
+
   .history-item-image {
     width: 60px;
     height: 60px;
     object-fit: cover;
     border-radius: var(--radius);
     flex-shrink: 0;
+    display: block;
   }
 
   .history-details {
@@ -293,6 +306,16 @@
 
   .history-action strong {
     color: var(--text-primary);
+  }
+
+  .history-link {
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--transition);
+  }
+
+  .history-link:hover {
+    color: var(--primary);
   }
 
   .history-date {

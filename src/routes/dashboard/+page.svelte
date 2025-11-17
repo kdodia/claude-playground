@@ -86,16 +86,22 @@
               {@const borrower = $appStore.users.find((u) => u.id === request.borrowerId)}
               <div class="request-card card">
                 <div class="request-content">
-                  <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  <a href="/items/{item?.id}" class="request-item-link">
+                    <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  </a>
                   <div class="request-details">
-                    <h3 class="request-title">{item?.name}</h3>
+                    <a href="/items/{item?.id}" class="request-title-link">
+                      <h3 class="request-title">{item?.name}</h3>
+                    </a>
                     <div class="request-meta">
-                      <img
-                        src={borrower?.profilePic}
-                        alt={borrower?.name}
-                        class="borrower-avatar"
-                      />
-                      <span class="borrower-name">{borrower?.name}</span>
+                      <a href="/profile/{borrower?.id}" class="user-link">
+                        <img
+                          src={borrower?.profilePic}
+                          alt={borrower?.name}
+                          class="borrower-avatar"
+                        />
+                        <span class="borrower-name">{borrower?.name}</span>
+                      </a>
                       <span class="rating">⭐ {borrower?.rating.toFixed(1)}</span>
                     </div>
                     <div class="request-dates">
@@ -137,13 +143,19 @@
               {@const owner = $appStore.users.find((u) => u.id === request.ownerId)}
               <div class="request-card card">
                 <div class="request-content">
-                  <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  <a href="/items/{item?.id}" class="request-item-link">
+                    <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  </a>
                   <div class="request-details">
-                    <h3 class="request-title">{item?.name}</h3>
+                    <a href="/items/{item?.id}" class="request-title-link">
+                      <h3 class="request-title">{item?.name}</h3>
+                    </a>
                     <div class="request-meta">
                       <span>Requested from</span>
-                      <img src={owner?.profilePic} alt={owner?.name} class="borrower-avatar" />
-                      <span class="borrower-name">{owner?.name}</span>
+                      <a href="/profile/{owner?.id}" class="user-link">
+                        <img src={owner?.profilePic} alt={owner?.name} class="borrower-avatar" />
+                        <span class="borrower-name">{owner?.name}</span>
+                      </a>
                     </div>
                     <div class="request-dates">
                       <span>📅</span>
@@ -182,17 +194,23 @@
               {@const borrower = $appStore.users.find((u) => u.id === loan.borrowerId)}
               <div class="request-card card">
                 <div class="request-content">
-                  <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  <a href="/items/{item?.id}" class="request-item-link">
+                    <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
+                  </a>
                   <div class="request-details">
-                    <h3 class="request-title">{item?.name}</h3>
+                    <a href="/items/{item?.id}" class="request-title-link">
+                      <h3 class="request-title">{item?.name}</h3>
+                    </a>
                     <div class="request-meta">
                       <span>Borrowed by</span>
-                      <img
-                        src={borrower?.profilePic}
-                        alt={borrower?.name}
-                        class="borrower-avatar"
-                      />
-                      <span class="borrower-name">{borrower?.name}</span>
+                      <a href="/profile/{borrower?.id}" class="user-link">
+                        <img
+                          src={borrower?.profilePic}
+                          alt={borrower?.name}
+                          class="borrower-avatar"
+                        />
+                        <span class="borrower-name">{borrower?.name}</span>
+                      </a>
                     </div>
                     <div class="request-dates">
                       <span>📅</span>
@@ -299,12 +317,23 @@
     flex: 1;
   }
 
+  .request-item-link {
+    display: block;
+    flex-shrink: 0;
+    transition: opacity var(--transition);
+  }
+
+  .request-item-link:hover {
+    opacity: 0.8;
+  }
+
   .request-item-image {
     width: 120px;
     height: 120px;
     object-fit: cover;
     border-radius: var(--radius);
     flex-shrink: 0;
+    display: block;
   }
 
   .request-details {
@@ -314,10 +343,40 @@
     flex: 1;
   }
 
+  .request-title-link {
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--transition);
+  }
+
+  .request-title-link:hover {
+    color: var(--primary);
+  }
+
   .request-title {
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0;
+  }
+
+  .user-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition);
+    border-radius: var(--radius);
+    padding: 0.25rem 0.5rem;
+    margin: -0.25rem -0.5rem;
+  }
+
+  .user-link:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+  }
+
+  .user-link:hover .borrower-name {
+    color: var(--primary);
   }
 
   .request-meta {

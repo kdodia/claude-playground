@@ -37,10 +37,14 @@
     <p class="item-description">{item.description.slice(0, 80)}...</p>
 
     <div class="item-footer">
-      <div class="owner-info">
+      <a
+        href="/profile/{$owner?.id}"
+        class="owner-info"
+        onclick={(e) => e.stopPropagation()}
+      >
         <img src={$owner?.profilePic} alt={$owner?.name} class="owner-avatar" />
         <span class="owner-name">{$owner?.name}</span>
-      </div>
+      </a>
       <span class="borrows-count">{item.totalBorrows} borrows</span>
     </div>
   </div>
@@ -112,6 +116,20 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition);
+    border-radius: var(--radius);
+    padding: 0.25rem 0.5rem;
+    margin: -0.25rem -0.5rem;
+  }
+
+  .owner-info:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+  }
+
+  .owner-info:hover .owner-name {
+    color: var(--primary);
   }
 
   .owner-avatar {
