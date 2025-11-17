@@ -361,6 +361,17 @@ export const mockBorrowRequests: BorrowRequest[] = [
     status: 'pending',
     message: 'Planning a movie night for my birthday!',
     createdAt: '2025-11-12T16:00:00Z'
+  },
+  {
+    id: 'req3',
+    itemId: 'item3',
+    borrowerId: 'user2',
+    ownerId: 'user1',
+    startDate: '2025-11-10',
+    endDate: '2025-11-18',
+    status: 'active',
+    message: 'Making a big batch of pesto for the holidays!',
+    createdAt: '2025-11-08T10:00:00Z'
   }
 ];
 
