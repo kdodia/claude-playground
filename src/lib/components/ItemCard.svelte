@@ -26,10 +26,7 @@
     <h3 class="item-name">{item.name}</h3>
 
     <div class="item-meta">
-      <div class="owner-info">
-        <img src={$owner?.profilePic} alt={$owner?.name} class="owner-avatar" />
-        <span class="owner-name">{$owner?.name}</span>
-      </div>
+      <span class="badge">{item.condition}</span>
 
       <div class="rating">
         <span>⭐</span>
@@ -40,7 +37,10 @@
     <p class="item-description">{item.description.slice(0, 80)}...</p>
 
     <div class="item-footer">
-      <span class="badge">{item.condition}</span>
+      <div class="owner-info">
+        <img src={$owner?.profilePic} alt={$owner?.name} class="owner-avatar" />
+        <span class="owner-name">{$owner?.name}</span>
+      </div>
       <span class="borrows-count">{item.totalBorrows} borrows</span>
     </div>
   </div>
