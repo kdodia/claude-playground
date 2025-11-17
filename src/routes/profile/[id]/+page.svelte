@@ -15,6 +15,16 @@
     $appStore.borrowHistory.filter((h) => h.borrowerId === userId || h.ownerId === userId)
   );
 
+  // Get active borrows for this user
+  let activeBorrows = $derived(
+    $appStore.borrowRequests.filter(
+      (r) => (r.borrowerId === userId || r.ownerId === userId) && (r.status === 'active' || r.status === 'approved')
+    )
+  );
+
+  // Combine active and completed for activity history
+  let allActivity = $derived([...activeBorrows, ...borrowHistory]);
+
   let isCurrentUser = $derived(userId === $appStore.currentUserId);
   let isFriend = $derived(currentUser?.friendIds.includes(userId || '') || false);
   let isCloseFriend = $derived(currentUser?.closeFriendIds.includes(userId || '') || false);
@@ -86,17 +96,18 @@
           {/if}
         </section>
 
-        {#if borrowHistory.length > 0}
+        {#if allActivity.length > 0}
           <section class="history-section">
             <h2 class="section-title">Activity History</h2>
             <div class="history-list">
-              {#each borrowHistory.slice(0, 10) as history}
-                {@const item = $appStore.items.find((i) => i.id === history.itemId)}
+              {#each allActivity.slice(0, 10) as activity}
+                {@const item = $appStore.items.find((i) => i.id === activity.itemId)}
                 {@const otherUser = $appStore.users.find(
-                  (u) => u.id === (history.borrowerId === userId ? history.ownerId : history.borrowerId)
+                  (u) => u.id === (activity.borrowerId === userId ? activity.ownerId : activity.borrowerId)
                 )}
-                {@const wasBorrower = history.borrowerId === userId}
-                <div class="history-item">
+                {@const wasBorrower = activity.borrowerId === userId}
+                {@const isActive = 'status' in activity && (activity.status === 'active' || activity.status === 'approved')}
+                <div class="history-item" class:active-item={isActive}>
                   <img src={item?.imageUrl} alt={item?.name} class="history-item-image" />
                   <div class="history-details">
                     <div class="history-action">
@@ -104,16 +115,27 @@
                       <strong>{item?.name}</strong>
                       <span>{wasBorrower ? 'from' : 'to'}</span>
                       <strong>{otherUser?.name}</strong>
+                      {#if isActive}
+                        <span class="badge badge-success">Active</span>
+                      {/if}
                     </div>
                     <div class="history-date">
-                      {new Date(history.endDate).toLocaleDateString('en-US', {
-                        month: 'short',
-                        year: 'numeric'
-                      })}
+                      {#if isActive}
+                        Return by: {new Date(activity.endDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      {:else}
+                        {new Date(activity.endDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          year: 'numeric'
+                        })}
+                      {/if}
                     </div>
-                    {#if history.rating}
+                    {#if 'rating' in activity && activity.rating}
                       <div class="history-rating">
-                        {#each Array(history.rating) as _}
+                        {#each Array(activity.rating) as _}
                           <span>⭐</span>
                         {/each}
                       </div>
@@ -242,6 +264,11 @@
     align-items: center;
   }
 
+  .history-item.active-item {
+    background-color: rgba(16, 185, 129, 0.05);
+    border-left: 3px solid var(--primary);
+  }
+
   .history-item-image {
     width: 60px;
     height: 60px;
@@ -258,6 +285,10 @@
     font-size: 0.875rem;
     color: var(--text-secondary);
     margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .history-action strong {
