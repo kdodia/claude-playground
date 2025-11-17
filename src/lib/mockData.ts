@@ -147,7 +147,7 @@ export const mockItems: Item[] = [
     description: '12-cup food processor with multiple blade attachments. Great for meal prep!',
     categoryId: 'cat1-1',
     ownerId: 'user1',
-    imageUrl: 'https://images.unsplash.com/photo-1625945802610-f5b44b815111?w=400',
+    imageUrl: 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?w=400',
     condition: 'excellent',
     permissionLevel: 'friends',
     tagIds: [],
