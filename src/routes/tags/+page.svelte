@@ -138,17 +138,19 @@
                 <div class="items-grid">
                   {#each tagItems as item}
                     <div class="item-card-mini card">
-                      <img src={item.imageUrl} alt={item.name} class="item-thumb" />
-                      <div class="item-mini-info">
-                        <span class="item-mini-name">{item.name}</span>
-                        <button
-                          class="remove-btn"
-                          onclick={() => removeItemFromTag(item.id)}
-                          title="Remove from tag"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      <a href="/items/{item.id}" class="item-link">
+                        <img src={item.imageUrl} alt={item.name} class="item-thumb" />
+                        <div class="item-mini-info">
+                          <span class="item-mini-name">{item.name}</span>
+                        </div>
+                      </a>
+                      <button
+                        class="remove-btn"
+                        onclick={() => removeItemFromTag(item.id)}
+                        title="Remove from tag"
+                      >
+                        ✕
+                      </button>
                     </div>
                   {/each}
                 </div>
@@ -163,17 +165,19 @@
                 <div class="items-grid">
                   {#each availableItems as item}
                     <div class="item-card-mini card">
-                      <img src={item.imageUrl} alt={item.name} class="item-thumb" />
-                      <div class="item-mini-info">
-                        <span class="item-mini-name">{item.name}</span>
-                        <button
-                          class="add-btn"
-                          onclick={() => addItemToTag(item.id)}
-                          title="Add to tag"
-                        >
-                          +
-                        </button>
-                      </div>
+                      <a href="/items/{item.id}" class="item-link">
+                        <img src={item.imageUrl} alt={item.name} class="item-thumb" />
+                        <div class="item-mini-info">
+                          <span class="item-mini-name">{item.name}</span>
+                        </div>
+                      </a>
+                      <button
+                        class="add-btn"
+                        onclick={() => addItemToTag(item.id)}
+                        title="Add to tag"
+                      >
+                        +
+                      </button>
                     </div>
                   {/each}
                 </div>
@@ -340,6 +344,20 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+  }
+
+  .item-link {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+    transition: opacity var(--transition);
+  }
+
+  .item-link:hover {
+    opacity: 0.9;
   }
 
   .item-thumb {
@@ -367,6 +385,9 @@
 
   .add-btn,
   .remove-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
@@ -378,6 +399,8 @@
     cursor: pointer;
     transition: all var(--transition);
     flex-shrink: 0;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
   }
 
   .add-btn {
