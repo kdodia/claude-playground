@@ -37,14 +37,17 @@
     <p class="item-description">{item.description.slice(0, 80)}...</p>
 
     <div class="item-footer">
-      <a
-        href="/profile/{$lender?.id}"
+      <button
         class="lender-info"
-        onclick={(e) => e.stopPropagation()}
+        onclick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.href = `/profile/${$lender?.id}`;
+        }}
       >
         <img src={$lender?.profilePic} alt={$lender?.name} class="lender-avatar" />
         <span class="lender-name">{$lender?.name}</span>
-      </a>
+      </button>
       <span class="borrows-count">{item.totalBorrows} borrows</span>
     </div>
   </div>
