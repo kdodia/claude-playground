@@ -36,6 +36,18 @@ function createAppStore() {
     subscribe((state) => {
       saveState(state);
     });
+
+    // Listen for storage events from other tabs to sync state
+    window.addEventListener('storage', (event) => {
+      if (event.key === STORAGE_KEY && event.newValue) {
+        try {
+          const newState = JSON.parse(event.newValue);
+          set(newState);
+        } catch (e) {
+          console.error('Failed to sync state from other tab:', e);
+        }
+      }
+    });
   }
 
   return {
