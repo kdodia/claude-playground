@@ -4,9 +4,27 @@
   import type { Item } from '$lib/types';
 
   let searchQuery = $state('');
+  let debouncedSearchQuery = $state(''); // Debounced version for filtering
   let selectedCategory = $state('all');
   let selectedTag = $state('all');
   let viewMode = $state<'grid' | 'list'>('grid');
+
+  // Debounce search input
+  let searchTimeout: number;
+  $effect(() => {
+    clearTimeout(searchTimeout);
+    searchTimeout = window.setTimeout(() => {
+      debouncedSearchQuery = searchQuery;
+    }, 300); // 300ms debounce delay
+  });
+
+  // Helper to recursively get all category IDs (category + all descendants)
+  function getCategoryAndDescendants(categoryId: string): string[] {
+    const descendants = $appStore.categories
+      .filter((c) => c.parentId === categoryId)
+      .flatMap((c) => getCategoryAndDescendants(c.id));
+    return [categoryId, ...descendants];
+  }
 
   // Derived filtered items
   let filteredItems = $derived.by(() => {
@@ -16,9 +34,9 @@
       canUserViewItem(item, $appStore.currentUserId, $appStore)
     );
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+    // Search filter (debounced to improve performance)
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
       items = items.filter(
         (item) =>
           item.name.toLowerCase().includes(query) ||
@@ -26,15 +44,10 @@
       );
     }
 
-    // Category filter
+    // Category filter (includes all descendant categories)
     if (selectedCategory !== 'all') {
-      items = items.filter((item) => {
-        const category = $appStore.categories.find((c) => c.id === item.categoryId);
-        return (
-          item.categoryId === selectedCategory ||
-          category?.parentId === selectedCategory
-        );
-      });
+      const categoryIds = getCategoryAndDescendants(selectedCategory);
+      items = items.filter((item) => categoryIds.includes(item.categoryId));
     }
 
     // Tag filter
