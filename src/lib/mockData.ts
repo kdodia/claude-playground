@@ -1,4 +1,4 @@
-import type { User, Item, Category, Tag, BorrowRequest, BorrowHistory, AppState } from './types';
+import type { User, Item, Category, Tag, BorrowRequest, BorrowHistory, FriendRequest, AppState } from './types';
 
 // Mock users
 export const mockUsers: User[] = [
@@ -485,6 +485,26 @@ export const mockBorrowHistory: BorrowHistory[] = [
   }
 ];
 
+// Mock friend requests
+export const mockFriendRequests: FriendRequest[] = [
+  {
+    id: 'freq1',
+    fromUserId: 'user5',
+    toUserId: 'user1',
+    status: 'pending',
+    message: 'Hey Sarah! I love your camping gear collection. Would love to connect!',
+    createdAt: '2025-11-15T14:30:00Z'
+  },
+  {
+    id: 'freq2',
+    fromUserId: 'user6',
+    toUserId: 'user1',
+    status: 'pending',
+    message: 'Hi! Just moved to the neighborhood and saw you have some great kitchen items.',
+    createdAt: '2025-11-16T09:15:00Z'
+  }
+];
+
 // Initial app state
 export const initialAppState: AppState = {
   currentUserId: 'user1', // Default logged-in user is Sarah
@@ -494,6 +514,6 @@ export const initialAppState: AppState = {
   tags: mockTags,
   borrowRequests: mockBorrowRequests,
   borrowHistory: mockBorrowHistory,
-  friendRequests: [],
+  friendRequests: mockFriendRequests,
   notifications: []
 };

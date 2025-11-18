@@ -64,6 +64,17 @@
     toast = { message: 'Removed from close friends', type: 'success' };
     setTimeout(() => (toast = null), 3000);
   }
+
+  // Helper to check if friend request already sent
+  function getFriendRequestStatus(toUserId: string) {
+    if (!currentUser) return null;
+    return $appStore.friendRequests.find(
+      (req) =>
+        req.fromUserId === currentUser.id &&
+        req.toUserId === toUserId &&
+        req.status === 'pending'
+    );
+  }
 </script>
 
 <div class="network-page fade-in">
@@ -246,6 +257,7 @@
               </div>
             {:else}
               {#each friendsOfFriends as user}
+                {@const pendingRequest = getFriendRequestStatus(user.id)}
                 <div class="user-card card">
                   <a href="/profile/{user.id}" class="user-card-link">
                     <img src={user.profilePic} alt={user.name} class="user-avatar" />
@@ -260,12 +272,24 @@
                     </div>
                   </a>
                   <div class="user-actions">
-                    <button
-                      class="btn btn-sm btn-primary"
-                      onclick={() => sendFriendRequest(user.id)}
-                    >
-                      Send Friend Request
-                    </button>
+                    {#if pendingRequest}
+                      <button class="btn btn-sm btn-secondary" disabled>
+                        Request Sent
+                      </button>
+                      <span class="request-sent-date">
+                        {new Date(pendingRequest.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    {:else}
+                      <button
+                        class="btn btn-sm btn-primary"
+                        onclick={() => sendFriendRequest(user.id)}
+                      >
+                        Send Friend Request
+                      </button>
+                    {/if}
                   </div>
                 </div>
               {/each}
@@ -281,6 +305,7 @@
               </div>
             {:else}
               {#each neighbors as user}
+                {@const pendingRequest = getFriendRequestStatus(user.id)}
                 <div class="user-card card">
                   <a href="/profile/{user.id}" class="user-card-link">
                     <img src={user.profilePic} alt={user.name} class="user-avatar" />
@@ -295,12 +320,24 @@
                     </div>
                   </a>
                   <div class="user-actions">
-                    <button
-                      class="btn btn-sm btn-primary"
-                      onclick={() => sendFriendRequest(user.id)}
-                    >
-                      Send Friend Request
-                    </button>
+                    {#if pendingRequest}
+                      <button class="btn btn-sm btn-secondary" disabled>
+                        Request Sent
+                      </button>
+                      <span class="request-sent-date">
+                        {new Date(pendingRequest.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    {:else}
+                      <button
+                        class="btn btn-sm btn-primary"
+                        onclick={() => sendFriendRequest(user.id)}
+                      >
+                        Send Friend Request
+                      </button>
+                    {/if}
                   </div>
                 </div>
               {/each}
@@ -480,8 +517,15 @@
 
   .user-actions {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
-    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  .request-sent-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
   }
 
   .btn-sm {
