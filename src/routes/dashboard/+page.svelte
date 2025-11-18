@@ -5,6 +5,13 @@
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // Return modal state
+  let showReturnModal = $state(false);
+  let selectedLoanId = $state<string | null>(null);
+  let returnRating = $state(5);
+  let returnReview = $state('');
+  let hoveredStar = $state(0);
+
   function approveRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'approved' });
     toast = { message: 'Request approved!', type: 'success' };
@@ -18,12 +25,31 @@
   }
 
   function markAsReturned(requestId: string) {
-    // Show a simple completion flow
-    const rating = 5; // In a real app, this would be a form
-    const review = 'Item returned in good condition';
-    appStore.completeBorrow(requestId, rating, review);
+    selectedLoanId = requestId;
+    returnRating = 5;
+    returnReview = '';
+    showReturnModal = true;
+  }
+
+  function submitReturn() {
+    if (!selectedLoanId) return;
+
+    appStore.completeBorrow(selectedLoanId, returnRating, returnReview);
     toast = { message: 'Item marked as returned!', type: 'success' };
     setTimeout(() => (toast = null), 3000);
+
+    // Reset modal state
+    showReturnModal = false;
+    selectedLoanId = null;
+    returnRating = 5;
+    returnReview = '';
+  }
+
+  function cancelReturn() {
+    showReturnModal = false;
+    selectedLoanId = null;
+    returnRating = 5;
+    returnReview = '';
   }
 </script>
 
@@ -233,6 +259,51 @@
     </div>
   </div>
 </div>
+
+{#if showReturnModal}
+  <div class="modal-overlay" onclick={cancelReturn}>
+    <div class="modal-content" onclick={(e) => e.stopPropagation()}>
+      <div class="modal-header">
+        <h2>Mark Item as Returned</h2>
+        <button class="modal-close" onclick={cancelReturn}>✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>How was the experience?</label>
+          <div class="star-rating">
+            {#each [1, 2, 3, 4, 5] as star}
+              <button
+                class="star"
+                class:filled={star <= (hoveredStar || returnRating)}
+                onclick={() => (returnRating = star)}
+                onmouseenter={() => (hoveredStar = star)}
+                onmouseleave={() => (hoveredStar = 0)}
+              >
+                ⭐
+              </button>
+            {/each}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="review">Review (optional)</label>
+          <textarea
+            id="review"
+            bind:value={returnReview}
+            placeholder="Share your experience with this item..."
+            rows="4"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick={cancelReturn}>Cancel</button>
+        <button class="btn btn-primary" onclick={submitReturn}>Complete Return</button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 {#if toast}
   <Toast message={toast.message} type={toast.type} onClose={() => (toast = null)} />
@@ -448,6 +519,128 @@
   .empty-state p {
     color: var(--text-secondary);
     margin: 0;
+  }
+
+  /* Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    background: var(--background);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0.25rem;
+    line-height: 1;
+    transition: color var(--transition);
+  }
+
+  .modal-close:hover {
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border);
+    justify-content: flex-end;
+  }
+
+  .star-rating {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .star {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 0;
+    transition: transform var(--transition), opacity var(--transition);
+    opacity: 0.3;
+  }
+
+  .star:hover {
+    transform: scale(1.2);
+  }
+
+  .star.filled {
+    opacity: 1;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+  }
+
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 0.9375rem;
+    resize: vertical;
+    transition: border-color var(--transition);
+  }
+
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
   }
 
   @media (max-width: 768px) {
