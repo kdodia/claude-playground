@@ -12,6 +12,21 @@
     { href: '/network', label: 'Network', icon: '👥' },
     { href: '/tags', label: 'Tags', icon: '🏷️' }
   ];
+
+  let showResetConfirm = $state(false);
+
+  function handleResetData() {
+    showResetConfirm = true;
+  }
+
+  function confirmReset() {
+    localStorage.removeItem('distributed-library-app-state');
+    window.location.reload();
+  }
+
+  function cancelReset() {
+    showResetConfirm = false;
+  }
 </script>
 
 <div class="app">
@@ -36,6 +51,10 @@
       </div>
 
       <div class="nav-actions">
+        <button class="reset-btn" onclick={handleResetData} title="Reset app data">
+          <span>🔄</span>
+        </button>
+
         <a href="/notifications" class="notification-btn">
           <span>🔔</span>
           {#if $unreadNotificationsCount > 0}
@@ -56,6 +75,19 @@
     {@render children()}
   </main>
 </div>
+
+{#if showResetConfirm}
+  <div class="modal-overlay" onclick={cancelReset}>
+    <div class="modal-content" onclick={(e) => e.stopPropagation()}>
+      <h2>Reset App Data?</h2>
+      <p>This will clear all data and reload the app with mock data. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn btn-error" onclick={confirmReset}>Reset Data</button>
+        <button class="btn btn-secondary" onclick={cancelReset}>Cancel</button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   .app {
@@ -140,6 +172,21 @@
     gap: 0.75rem;
   }
 
+  .reset-btn {
+    padding: 0.5rem;
+    border-radius: var(--radius);
+    font-size: 1.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition);
+    color: var(--text-secondary);
+  }
+
+  .reset-btn:hover {
+    background-color: var(--surface);
+  }
+
   .notification-btn {
     position: relative;
     padding: 0.5rem;
@@ -190,6 +237,68 @@
     padding: 2rem 0;
   }
 
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .modal-content {
+    background-color: var(--background);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.2s ease-out;
+  }
+
+  .modal-content h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+  }
+
+  .modal-content p {
+    margin: 0 0 1.5rem 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
   @media (max-width: 640px) {
     .nav-content {
       gap: 0.5rem;
@@ -206,6 +315,14 @@
     .nav-link {
       padding: 0.5rem;
       font-size: 1.125rem;
+    }
+
+    .modal-content {
+      padding: 1.5rem;
+    }
+
+    .modal-actions {
+      flex-direction: column;
     }
   }
 </style>
