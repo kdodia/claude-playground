@@ -1,10 +1,11 @@
 <script lang="ts">
   import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
-  import { TOAST_DURATION_MS, MAX_RATING, MIN_RATING, DEFAULT_RATING } from '$lib/constants';
+  import { MAX_RATING, MIN_RATING, DEFAULT_RATING } from '$lib/constants';
+  import { useToast } from '$lib/useToast';
 
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
-  let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
+  const { toast, showToast } = useToast();
 
   // Return modal state
   let showReturnModal = $state(false);
@@ -15,14 +16,12 @@
 
   function approveRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'approved' });
-    toast = { message: 'Request approved!', type: 'success' };
-    setTimeout(() => (toast = null), TOAST_DURATION_MS);
+    showToast('Request approved!', 'success');
   }
 
   function denyRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'denied' });
-    toast = { message: 'Request declined', type: 'error' };
-    setTimeout(() => (toast = null), TOAST_DURATION_MS);
+    showToast('Request declined', 'error');
   }
 
   function markAsReturned(requestId: string) {
@@ -37,14 +36,12 @@
 
     // Validate rating is within valid range
     if (returnRating < MIN_RATING || returnRating > MAX_RATING) {
-      toast = { message: `Rating must be between ${MIN_RATING} and ${MAX_RATING}`, type: 'error' };
-      setTimeout(() => (toast = null), TOAST_DURATION_MS);
+      showToast(`Rating must be between ${MIN_RATING} and ${MAX_RATING}`, 'error');
       return;
     }
 
     appStore.completeBorrow(selectedLoanId, returnRating, returnReview);
-    toast = { message: 'Item marked as returned!', type: 'success' };
-    setTimeout(() => (toast = null), TOAST_DURATION_MS);
+    showToast('Item marked as returned!', 'success');
 
     // Reset modal state
     showReturnModal = false;

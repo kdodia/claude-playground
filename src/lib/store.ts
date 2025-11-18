@@ -27,6 +27,26 @@ function saveState(state: AppState) {
   }
 }
 
+// Helper to create notifications with consistent structure
+function createNotification(
+  userId: string,
+  type: Notification['type'],
+  title: string,
+  message: string,
+  relatedId?: string
+): Notification {
+  return {
+    id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    userId,
+    type,
+    title,
+    message,
+    read: false,
+    createdAt: new Date().toISOString(),
+    relatedId
+  };
+}
+
 // Create the main app store
 function createAppStore() {
   const { subscribe, set, update } = writable<AppState>(loadState());
@@ -101,16 +121,13 @@ function createAppStore() {
           };
         }
 
-        const notification: Notification = {
-          id: `notif-${Date.now()}`,
-          userId: request.lenderId,
-          type: 'borrow-request',
-          title: 'New Borrow Request',
-          message: `${borrower.name} wants to borrow your ${item.name}`,
-          read: false,
-          createdAt: new Date().toISOString(),
-          relatedId: request.id
-        };
+        const notification = createNotification(
+          request.lenderId,
+          'borrow-request',
+          'New Borrow Request',
+          `${borrower.name} wants to borrow your ${item.name}`,
+          request.id
+        );
 
         return {
           ...state,
@@ -134,27 +151,21 @@ function createAppStore() {
         // Create appropriate notification based on status (only if we have required data)
         if (item && lender) {
           if (updates.status === 'approved') {
-            notification = {
-              id: `notif-${Date.now()}`,
-              userId: request.borrowerId,
-              type: 'request-approved',
-              title: 'Request Approved!',
-              message: `${lender.name} approved your request to borrow ${item.name}`,
-              read: false,
-              createdAt: new Date().toISOString(),
-              relatedId: requestId
-            };
+            notification = createNotification(
+              request.borrowerId,
+              'request-approved',
+              'Request Approved!',
+              `${lender.name} approved your request to borrow ${item.name}`,
+              requestId
+            );
           } else if (updates.status === 'denied') {
-            notification = {
-              id: `notif-${Date.now()}`,
-              userId: request.borrowerId,
-              type: 'request-denied',
-              title: 'Request Declined',
-              message: `${lender.name} declined your request to borrow ${item.name}`,
-              read: false,
-              createdAt: new Date().toISOString(),
-              relatedId: requestId
-            };
+            notification = createNotification(
+              request.borrowerId,
+              'request-denied',
+              'Request Declined',
+              `${lender.name} declined your request to borrow ${item.name}`,
+              requestId
+            );
           }
         }
 
@@ -232,16 +243,13 @@ function createAppStore() {
           return state;
         }
 
-        const notification: Notification = {
-          id: `notif-${Date.now()}`,
-          userId: request.lenderId,
-          type: 'request-nudge',
-          title: 'Friendly Reminder',
-          message: `👋 ${borrower.name} sent you a friendly reminder about their request for ${item.name}`,
-          read: false,
-          createdAt: new Date().toISOString(),
-          relatedId: requestId
-        };
+        const notification = createNotification(
+          request.lenderId,
+          'request-nudge',
+          'Friendly Reminder',
+          `👋 ${borrower.name} sent you a friendly reminder about their request for ${item.name}`,
+          requestId
+        );
 
         return {
           ...state,
