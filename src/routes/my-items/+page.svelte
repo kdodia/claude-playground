@@ -81,7 +81,7 @@
 
     {#if filteredItems.length === 0}
       <div class="empty-state">
-        <span class="empty-icon">📦</span>
+        <span class="empty-icon" aria-hidden="true">📦</span>
         <h3>
           {filterStatus === 'all'
             ? 'No items yet'

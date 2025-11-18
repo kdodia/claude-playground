@@ -45,10 +45,11 @@
 </script>
 
 <div class="app">
+  <a href="#main-content" class="skip-link">Skip to main content</a>
   <nav class="navbar">
     <div class="container nav-content">
       <a href="/" class="logo">
-        <span class="logo-icon">📚</span>
+        <span class="logo-icon" aria-hidden="true">📚</span>
         <span class="logo-text">Library of Things</span>
       </a>
 
@@ -59,7 +60,7 @@
             class="nav-link"
             class:active={$page.url.pathname === item.href}
           >
-            <span>{item.icon}</span>
+            <span aria-hidden="true">{item.icon}</span>
             <span>{item.label}</span>
           </a>
         {/each}
@@ -86,7 +87,7 @@
     </div>
   </nav>
 
-  <main class="main-content">
+  <main id="main-content" class="main-content">
     {@render children()}
   </main>
 </div>
@@ -105,6 +106,23 @@
 {/if}
 
 <style>
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 0 0 var(--radius) 0;
+    z-index: 1001;
+    font-weight: 600;
+  }
+
+  .skip-link:focus {
+    top: 0;
+  }
+
   .app {
     min-height: 100vh;
     display: flex;

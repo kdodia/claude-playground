@@ -70,7 +70,7 @@
 
           <div class="profile-stats">
             <div class="stat-item">
-              <span class="stat-value">⭐ {user.rating.toFixed(1)}</span>
+              <span class="stat-value"><span aria-hidden="true">⭐</span> {user.rating.toFixed(1)}</span>
               <span class="stat-label">Rating</span>
             </div>
             <div class="stat-item">
@@ -93,7 +93,7 @@
               <span class="badge badge-primary">Friend</span>
             {/if}
             {#if !isCurrentUser && theyMarkedMeCloseFriend}
-              <span class="badge badge-success">💚 Their Close Friend</span>
+              <span class="badge badge-success"><span aria-hidden="true">💚</span> Their Close Friend</span>
             {/if}
           </div>
         </div>
@@ -104,7 +104,7 @@
           <h2 class="section-title">Available Items ({userItems.length})</h2>
           {#if userItems.length === 0}
             <div class="empty-state">
-              <span class="empty-icon">📦</span>
+              <span class="empty-icon" aria-hidden="true">📦</span>
               <p>
                 {isCurrentUser
                   ? "You haven't added any items yet"
@@ -130,7 +130,7 @@
                 class:active={activityTab === 'borrowing'}
                 onclick={() => (activityTab = 'borrowing')}
               >
-                <span>📤</span>
+                <span aria-hidden="true">📤</span>
                 <span>Borrowing</span>
                 {#if borrowingActivity.length > 0}
                   <span class="tab-badge">{borrowingActivity.length}</span>
@@ -141,7 +141,7 @@
                 class:active={activityTab === 'lending'}
                 onclick={() => (activityTab = 'lending')}
               >
-                <span>📥</span>
+                <span aria-hidden="true">📥</span>
                 <span>Lending</span>
                 {#if lendingActivity.length > 0}
                   <span class="tab-badge">{lendingActivity.length}</span>
@@ -163,7 +163,7 @@
                   </a>
                   <div class="history-details">
                     <div class="history-action">
-                      <span>{activityTab === 'borrowing' ? '📤 Borrowed' : '📥 Lent'}</span>
+                      <span><span aria-hidden="true">{activityTab === 'borrowing' ? '📤' : '📥'}</span> {activityTab === 'borrowing' ? 'Borrowed' : 'Lent'}</span>
                       <a href="/items/{item?.id}" class="history-link"><strong>{item?.name}</strong></a>
                       <span>{activityTab === 'borrowing' ? 'from' : 'to'}</span>
                       <a href="/profile/{otherUser?.id}" class="history-link"><strong>{otherUser?.name}</strong></a>
@@ -208,7 +208,7 @@
                     {#if 'rating' in activity && activity.rating}
                       <div class="history-rating">
                         {#each Array(Math.max(0, Math.min(5, Math.floor(Number(activity.rating) || 0)))) as _}
-                          <span>⭐</span>
+                          <span aria-hidden="true">⭐</span>
                         {/each}
                       </div>
                     {/if}

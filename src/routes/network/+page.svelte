@@ -159,7 +159,7 @@
 
     <div class="stats-grid">
       <div class="stat-card card">
-        <div class="stat-icon">💚</div>
+        <div class="stat-icon" aria-hidden="true">💚</div>
         <div class="stat-info">
           <div class="stat-value">{closeFriends.length}</div>
           <div class="stat-label">Close Friends</div>
@@ -168,7 +168,7 @@
       </div>
 
       <div class="stat-card card">
-        <div class="stat-icon">👥</div>
+        <div class="stat-icon" aria-hidden="true">👥</div>
         <div class="stat-info">
           <div class="stat-value">{friends.length}</div>
           <div class="stat-label">Friends</div>
@@ -177,7 +177,7 @@
       </div>
 
       <div class="stat-card card">
-        <div class="stat-icon">🔗</div>
+        <div class="stat-icon" aria-hidden="true">🔗</div>
         <div class="stat-info">
           <div class="stat-value">{friendsOfFriends.length}</div>
           <div class="stat-label">Friends of Friends</div>
@@ -186,7 +186,7 @@
       </div>
 
       <div class="stat-card card">
-        <div class="stat-icon">🏘️</div>
+        <div class="stat-icon" aria-hidden="true">🏘️</div>
         <div class="stat-info">
           <div class="stat-value">{neighbors.length}</div>
           <div class="stat-label">Neighbors</div>
@@ -202,7 +202,7 @@
           class:active={networkTab === 'close-friends'}
           onclick={() => (networkTab = 'close-friends')}
         >
-          <span>💚</span>
+          <span aria-hidden="true">💚</span>
           <span>Close Friends</span>
           {#if closeFriends.length > 0}
             <span class="tab-badge">{closeFriends.length}</span>
@@ -214,7 +214,7 @@
           class:active={networkTab === 'friends'}
           onclick={() => (networkTab = 'friends')}
         >
-          <span>👥</span>
+          <span aria-hidden="true">👥</span>
           <span>Friends</span>
           {#if friends.length > 0}
             <span class="tab-badge">{friends.length}</span>
@@ -226,7 +226,7 @@
           class:active={networkTab === 'friends-of-friends'}
           onclick={() => (networkTab = 'friends-of-friends')}
         >
-          <span>🔗</span>
+          <span aria-hidden="true">🔗</span>
           <span>Friends of Friends</span>
           {#if friendsOfFriends.length > 0}
             <span class="tab-badge">{friendsOfFriends.length}</span>
@@ -238,7 +238,7 @@
           class:active={networkTab === 'neighbors'}
           onclick={() => (networkTab = 'neighbors')}
         >
-          <span>🏘️</span>
+          <span aria-hidden="true">🏘️</span>
           <span>Neighbors</span>
           {#if neighbors.length > 0}
             <span class="tab-badge">{neighbors.length}</span>
@@ -250,7 +250,7 @@
           class:active={networkTab === 'friend-requests'}
           onclick={() => (networkTab = 'friend-requests')}
         >
-          <span>📬</span>
+          <span aria-hidden="true">📬</span>
           <span>Friend Requests</span>
           {#if $incomingFriendRequests.length > 0 || outgoingFriendRequests.length > 0}
             <span class="tab-badge">{$incomingFriendRequests.length + outgoingFriendRequests.length}</span>
@@ -263,7 +263,7 @@
           <div class="users-grid">
             {#if closeFriends.length === 0}
               <div class="empty-state">
-                <span class="empty-icon">💚</span>
+                <span class="empty-icon" aria-hidden="true">💚</span>
                 <h3>No close friends yet</h3>
                 <p>Promote friends to your inner circle to share special items with them</p>
               </div>
@@ -276,12 +276,12 @@
                       <h3 class="user-name">{user.name}</h3>
                       <p class="user-location">{user.address?.city}</p>
                       <div class="user-stats">
-                        <span>⭐ {user.rating.toFixed(1)}</span>
+                        <span><span aria-hidden="true">⭐</span> {user.rating.toFixed(1)}</span>
                         <span>•</span>
                         <span>{user.totalLends} lends</span>
                       </div>
                       {#if currentUser && user.closeFriendIds.includes(currentUser.id)}
-                        <span class="badge badge-success">💚 Their Close Friend</span>
+                        <span class="badge badge-success"><span aria-hidden="true">💚</span> Their Close Friend</span>
                       {/if}
                     </div>
                   </a>
@@ -302,7 +302,7 @@
           <div class="users-grid">
             {#if friends.length === 0}
               <div class="empty-state">
-                <span class="empty-icon">👥</span>
+                <span class="empty-icon" aria-hidden="true">👥</span>
                 <h3>No friends yet</h3>
                 <p>Connect with friends-of-friends and neighbors to grow your network</p>
               </div>
@@ -315,12 +315,12 @@
                       <h3 class="user-name">{user.name}</h3>
                       <p class="user-location">{user.address?.city}</p>
                       <div class="user-stats">
-                        <span>⭐ {user.rating.toFixed(1)}</span>
+                        <span><span aria-hidden="true">⭐</span> {user.rating.toFixed(1)}</span>
                         <span>•</span>
                         <span>{user.totalLends} lends</span>
                       </div>
                       {#if currentUser && user.closeFriendIds.includes(currentUser.id)}
-                        <span class="badge badge-success">💚 Their Close Friend</span>
+                        <span class="badge badge-success"><span aria-hidden="true">💚</span> Their Close Friend</span>
                       {/if}
                     </div>
                   </a>
@@ -340,7 +340,7 @@
           <div class="users-grid">
             {#if friendsOfFriends.length === 0}
               <div class="empty-state">
-                <span class="empty-icon">🔗</span>
+                <span class="empty-icon" aria-hidden="true">🔗</span>
                 <h3>No friends-of-friends</h3>
                 <p>Your friends don't have any other connections yet</p>
               </div>
@@ -354,7 +354,7 @@
                       <h3 class="user-name">{user.name}</h3>
                       <p class="user-location">{user.address?.city}</p>
                       <div class="user-stats">
-                        <span>⭐ {user.rating.toFixed(1)}</span>
+                        <span><span aria-hidden="true">⭐</span> {user.rating.toFixed(1)}</span>
                         <span>•</span>
                         <span>{user.totalLends} lends</span>
                       </div>
@@ -388,7 +388,7 @@
           <div class="users-grid">
             {#if neighbors.length === 0}
               <div class="empty-state">
-                <span class="empty-icon">🏘️</span>
+                <span class="empty-icon" aria-hidden="true">🏘️</span>
                 <h3>No neighbors found</h3>
                 <p>No other users in {currentUser?.address?.city} yet</p>
               </div>
@@ -402,7 +402,7 @@
                       <h3 class="user-name">{user.name}</h3>
                       <p class="user-location">{user.address?.city}</p>
                       <div class="user-stats">
-                        <span>⭐ {user.rating.toFixed(1)}</span>
+                        <span><span aria-hidden="true">⭐</span> {user.rating.toFixed(1)}</span>
                         <span>•</span>
                         <span>{user.totalLends} lends</span>
                       </div>
@@ -436,7 +436,7 @@
           <div class="friend-requests-section">
             <div class="request-subsection">
               <h2 class="subsection-title">
-                <span>📥</span>
+                <span aria-hidden="true">📥</span>
                 <span>Incoming Requests</span>
                 {#if $incomingFriendRequests.length > 0}
                   <span class="subsection-badge">{$incomingFriendRequests.length}</span>
@@ -445,7 +445,7 @@
               <div class="requests-list">
                 {#if $incomingFriendRequests.length === 0}
                   <div class="empty-state">
-                    <span class="empty-icon">📬</span>
+                    <span class="empty-icon" aria-hidden="true">📬</span>
                     <h3>No incoming requests</h3>
                     <p>Friend requests from others will appear here</p>
                   </div>
@@ -463,9 +463,9 @@
                           </a>
                           <p class="request-bio">{fromUser?.bio}</p>
                           <div class="request-meta">
-                            <span>📍 {fromUser?.address?.city}</span>
+                            <span><span aria-hidden="true">📍</span> {fromUser?.address?.city}</span>
                             <span>•</span>
-                            <span>⭐ {fromUser?.rating.toFixed(1)}</span>
+                            <span><span aria-hidden="true">⭐</span> {fromUser?.rating.toFixed(1)}</span>
                             <span>•</span>
                             <span>{fromUser?.totalLends} lends</span>
                           </div>
@@ -490,7 +490,7 @@
 
             <div class="request-subsection">
               <h2 class="subsection-title">
-                <span>📤</span>
+                <span aria-hidden="true">📤</span>
                 <span>Outgoing Requests</span>
                 {#if outgoingFriendRequests.length > 0}
                   <span class="subsection-badge">{outgoingFriendRequests.length}</span>
@@ -499,7 +499,7 @@
               <div class="requests-list">
                 {#if outgoingFriendRequests.length === 0}
                   <div class="empty-state">
-                    <span class="empty-icon">📮</span>
+                    <span class="empty-icon" aria-hidden="true">📮</span>
                     <h3>No outgoing requests</h3>
                     <p>Friend requests you've sent will appear here</p>
                   </div>
@@ -517,9 +517,9 @@
                           </a>
                           <p class="request-bio">{toUser?.bio}</p>
                           <div class="request-meta">
-                            <span>📍 {toUser?.address?.city}</span>
+                            <span><span aria-hidden="true">📍</span> {toUser?.address?.city}</span>
                             <span>•</span>
-                            <span>⭐ {toUser?.rating.toFixed(1)}</span>
+                            <span><span aria-hidden="true">⭐</span> {toUser?.rating.toFixed(1)}</span>
                             <span>•</span>
                             <span>{toUser?.totalLends} lends</span>
                           </div>

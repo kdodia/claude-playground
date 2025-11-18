@@ -211,7 +211,7 @@
 
             <div class="item-meta-row">
               <div class="rating-large">
-                <span>⭐</span>
+                <span aria-hidden="true">⭐</span>
                 <span class="rating-value">{item.rating.toFixed(1)}</span>
                 <span class="rating-count">({item.totalBorrows} borrows)</span>
               </div>
@@ -224,7 +224,7 @@
                 <span class="lender-label">Lent by</span>
                 <a href="/profile/{lender?.id}" class="lender-name-large">{lender?.name}</a>
                 <div class="lender-stats">
-                  <span>⭐ {lender?.rating.toFixed(1)}</span>
+                  <span><span aria-hidden="true">⭐</span> {lender?.rating.toFixed(1)}</span>
                   <span>•</span>
                   <span>{lender?.totalLends} items lent</span>
                 </div>
@@ -264,7 +264,7 @@
                 <h3>Collections</h3>
                 <div class="tags-list">
                   {#each $appStore.tags.filter((t) => item.tagIds.includes(t.id)) as tag}
-                    <span class="badge badge-primary">🏷️ {tag.name}</span>
+                    <span class="badge badge-primary"><span aria-hidden="true">🏷️</span> {tag.name}</span>
                   {/each}
                 </div>
               </div>
@@ -290,7 +290,7 @@
                     <p class="request-status-message">"{existingRequest.message}"</p>
                   {/if}
                   <div class="request-status-dates">
-                    <span>📅 {new Date(existingRequest.startDate).toLocaleDateString()} - {new Date(existingRequest.endDate).toLocaleDateString()}</span>
+                    <span><span aria-hidden="true">📅</span> {new Date(existingRequest.startDate).toLocaleDateString()} - {new Date(existingRequest.endDate).toLocaleDateString()}</span>
                   </div>
                   <p class="request-status-info">Waiting for {lender?.name} to respond to your request</p>
 
@@ -436,7 +436,7 @@
                         <div class="reviewer-name">{borrower?.name}</div>
                         <div class="review-rating">
                           {#each Array(hist.rating || 0) as _, i}
-                            <span>⭐</span>
+                            <span aria-hidden="true">⭐</span>
                           {/each}
                         </div>
                       </div>

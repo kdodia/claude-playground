@@ -113,7 +113,7 @@
                 class:active={selectedTagId === tag.id}
                 onclick={() => (selectedTagId = tag.id)}
               >
-                <span class="tag-icon">🏷️</span>
+                <span class="tag-icon" aria-hidden="true">🏷️</span>
                 <div class="tag-info">
                   <span class="tag-name">{tag.name}</span>
                   <span class="tag-count">{tag.itemIds.length} items</span>
@@ -187,7 +187,7 @@
           </div>
         {:else}
           <div class="no-selection">
-            <span class="empty-icon">🏷️</span>
+            <span class="empty-icon" aria-hidden="true">🏷️</span>
             <h3>Select a tag to view items</h3>
             <p>Choose a tag from the sidebar to manage its items</p>
           </div>

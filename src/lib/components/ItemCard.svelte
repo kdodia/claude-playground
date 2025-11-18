@@ -35,7 +35,7 @@
       <span class="badge">{item.condition}</span>
 
       <div class="rating">
-        <span>⭐</span>
+        <span aria-hidden="true">⭐</span>
         <span>{item.rating.toFixed(1)}</span>
       </div>
     </div>

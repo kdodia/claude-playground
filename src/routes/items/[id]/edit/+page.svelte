@@ -205,14 +205,15 @@
                 id="imageUrl"
                 bind:value={imageUrl}
                 placeholder="https://images.unsplash.com/photo-..."
+                aria-describedby="imageUrl-hint"
                 required
               />
-              <span class="form-hint">Use a link to an image from Unsplash or another source</span>
+              <span id="imageUrl-hint" class="form-hint">Use a link to an image from Unsplash or another source</span>
             </div>
 
             {#if imageUrl}
               <div class="image-preview">
-                <img src={imageUrl} alt="Preview" onerror={(e) => (e.currentTarget as HTMLImageElement).style.display = 'none'} />
+                <img src={imageUrl} alt={name ? `Preview of ${name}` : 'Item image preview'} onerror={(e) => (e.currentTarget as HTMLImageElement).style.display = 'none'} />
               </div>
             {/if}
           </div>
@@ -364,7 +365,7 @@
                 {#each blockedDates as block, index}
                   <div class="blocked-date-card">
                     <div class="blocked-date-info">
-                      <span class="blocked-date-icon">🚫</span>
+                      <span class="blocked-date-icon" aria-hidden="true">🚫</span>
                       <div>
                         <div class="blocked-date-range">
                           {new Date(block.startDate).toLocaleDateString()} - {new Date(block.endDate).toLocaleDateString()}

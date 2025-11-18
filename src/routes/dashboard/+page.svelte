@@ -82,37 +82,49 @@
       </div>
     </header>
 
-    <div class="dashboard-tabs">
+    <div class="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
       <button
+        role="tab"
         class="tab"
         class:active={activeTab === 'incoming'}
+        aria-selected={activeTab === 'incoming'}
+        aria-controls="incoming-panel"
+        id="incoming-tab"
         onclick={() => (activeTab = 'incoming')}
       >
-        <span>📥</span>
+        <span aria-hidden="true">📥</span>
         <span>Incoming Requests</span>
         {#if $incomingRequests.length > 0}
-          <span class="tab-badge">{$incomingRequests.length}</span>
+          <span class="tab-badge" aria-label="{$incomingRequests.length} incoming requests">{$incomingRequests.length}</span>
         {/if}
       </button>
 
       <button
+        role="tab"
         class="tab"
         class:active={activeTab === 'outgoing'}
+        aria-selected={activeTab === 'outgoing'}
+        aria-controls="outgoing-panel"
+        id="outgoing-tab"
         onclick={() => (activeTab = 'outgoing')}
       >
-        <span>📤</span>
+        <span aria-hidden="true">📤</span>
         <span>My Requests</span>
       </button>
 
       <button
+        role="tab"
         class="tab"
         class:active={activeTab === 'active'}
+        aria-selected={activeTab === 'active'}
+        aria-controls="active-panel"
+        id="active-tab"
         onclick={() => (activeTab = 'active')}
       >
-        <span>🔄</span>
+        <span aria-hidden="true">🔄</span>
         <span>Active Loans</span>
         {#if $activeLoans.length > 0}
-          <span class="tab-badge">{$activeLoans.length}</span>
+          <span class="tab-badge" aria-label="{$activeLoans.length} active loans">{$activeLoans.length}</span>
         {/if}
       </button>
     </div>
@@ -122,7 +134,7 @@
         <div class="requests-list">
           {#if $incomingRequests.length === 0}
             <div class="empty-state">
-              <span class="empty-icon">📬</span>
+              <span class="empty-icon" aria-hidden="true">📬</span>
               <h3>No incoming requests</h3>
               <p>When people request to borrow your items, they'll appear here</p>
             </div>
@@ -148,10 +160,10 @@
                         />
                         <span class="borrower-name">{borrower?.name}</span>
                       </a>
-                      <span class="rating">⭐ {borrower?.rating.toFixed(1)}</span>
+                      <span class="rating"><span aria-hidden="true">⭐</span> {borrower?.rating.toFixed(1)}</span>
                     </div>
                     <div class="request-dates">
-                      <span>📅</span>
+                      <span aria-hidden="true">📅</span>
                       <span
                         >{new Date(request.startDate).toLocaleDateString()} - {new Date(
                           request.endDate
@@ -179,7 +191,7 @@
         <div class="requests-list">
           {#if $outgoingRequests.length === 0}
             <div class="empty-state">
-              <span class="empty-icon">📦</span>
+              <span class="empty-icon" aria-hidden="true">📦</span>
               <h3>No outgoing requests</h3>
               <p>Requests you make to borrow items will appear here</p>
             </div>
@@ -204,7 +216,7 @@
                       </a>
                     </div>
                     <div class="request-dates">
-                      <span>📅</span>
+                      <span aria-hidden="true">📅</span>
                       <span
                         >{new Date(request.startDate).toLocaleDateString()} - {new Date(
                           request.endDate
@@ -230,7 +242,7 @@
         <div class="requests-list">
           {#if $activeLoans.length === 0}
             <div class="empty-state">
-              <span class="empty-icon">📋</span>
+              <span class="empty-icon" aria-hidden="true">📋</span>
               <h3>No active loans</h3>
               <p>Items currently borrowed from you will appear here</p>
             </div>
@@ -259,7 +271,7 @@
                       </a>
                     </div>
                     <div class="request-dates">
-                      <span>📅</span>
+                      <span aria-hidden="true">📅</span>
                       <span class:overdue={new Date(loan.endDate) < new Date()}
                         >Return by: {new Date(loan.endDate).toLocaleDateString()}</span
                       >
@@ -304,7 +316,7 @@
                 onmouseenter={() => (hoveredStar = star)}
                 onmouseleave={() => (hoveredStar = 0)}
               >
-                ⭐
+                <span aria-hidden="true">⭐</span>
               </button>
             {/each}
           </div>

@@ -41,7 +41,7 @@
 
     {#if $currentUserNotifications.length === 0}
       <div class="empty-state">
-        <span class="empty-icon">🔔</span>
+        <span class="empty-icon" aria-hidden="true">🔔</span>
         <h3>No notifications yet</h3>
         <p>When people request your items or respond to your requests, you'll see it here</p>
       </div>
@@ -53,7 +53,7 @@
             class:unread={!notification.read}
             onclick={() => handleNotificationClick(notification)}
           >
-            <div class="notification-icon">
+            <div class="notification-icon" aria-hidden="true">
               {#if notification.type === 'borrow-request'}
                 📥
               {:else if notification.type === 'request-approved'}
