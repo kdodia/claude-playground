@@ -7,7 +7,8 @@
   let name = $state('');
   let description = $state('');
   let imageUrl = $state('');
-  let categoryId = $state('');
+  let parentCategoryId = $state('');
+  let subcategoryId = $state('');
   let condition = $state<'excellent' | 'good' | 'fair' | 'poor'>('good');
   let permissionLevel = $state<PermissionLevel>('friends');
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -15,10 +16,13 @@
   // Get all categories for dropdown
   let topLevelCategories = $derived($appStore.categories.filter((c) => !c.parentId));
   let subcategories = $derived(
-    categoryId && !categoryId.includes('-')
-      ? $appStore.categories.filter((c) => c.parentId === categoryId)
+    parentCategoryId
+      ? $appStore.categories.filter((c) => c.parentId === parentCategoryId)
       : []
   );
+
+  // The final category ID to use (subcategory if selected, otherwise parent)
+  let categoryId = $derived(subcategoryId || parentCategoryId);
 
   // Form validation
   let isValid = $derived(
@@ -62,6 +66,11 @@
 
   function handleCancel() {
     goto('/my-items');
+  }
+
+  function handleCategoryChange() {
+    // Reset subcategory when parent category changes
+    subcategoryId = '';
   }
 </script>
 
@@ -126,7 +135,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="category">Category *</label>
-              <select id="category" bind:value={categoryId} required>
+              <select id="category" bind:value={parentCategoryId} onchange={handleCategoryChange} required>
                 <option value="">Select a category</option>
                 {#each topLevelCategories as category}
                   <option value={category.id}>
@@ -139,8 +148,8 @@
             {#if subcategories.length > 0}
               <div class="form-group">
                 <label for="subcategory">Subcategory (optional)</label>
-                <select id="subcategory" bind:value={categoryId}>
-                  <option value={categoryId.split('-')[0]}>None</option>
+                <select id="subcategory" bind:value={subcategoryId}>
+                  <option value="">None</option>
                   {#each subcategories as subcat}
                     <option value={subcat.id}>
                       {subcat.icon} {subcat.name}
