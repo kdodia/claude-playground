@@ -58,6 +58,21 @@
 
   function sendFriendRequest(toUserId: string) {
     if (!currentUser) return;
+
+    // Check for duplicate or existing friend request
+    const existingRequest = $appStore.friendRequests.find(
+      (r) =>
+        ((r.fromUserId === currentUser.id && r.toUserId === toUserId) ||
+         (r.fromUserId === toUserId && r.toUserId === currentUser.id)) &&
+        r.status === 'pending'
+    );
+
+    if (existingRequest) {
+      toast = { message: 'Friend request already exists', type: 'error' };
+      setTimeout(() => (toast = null), 3000);
+      return;
+    }
+
     appStore.sendFriendRequest(currentUser.id, toUserId);
     toast = { message: 'Friend request sent!', type: 'success' };
     setTimeout(() => (toast = null), 3000);

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { appStore } from '$lib/store';
+  import { canUserViewItem } from '$lib/permissions';
   import ItemCard from '$lib/components/ItemCard.svelte';
 
   let userId = $derived($page.params.id);
@@ -8,7 +9,11 @@
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
 
   let userItems = $derived(
-    $appStore.items.filter((item) => item.lenderId === userId && item.available)
+    $appStore.items.filter(
+      (item) => item.lenderId === userId &&
+                item.available &&
+                canUserViewItem(item, $appStore.currentUserId, $appStore)
+    )
   );
 
   let borrowHistory = $derived(
@@ -203,7 +208,7 @@
                     </div>
                     {#if 'rating' in activity && activity.rating}
                       <div class="history-rating">
-                        {#each Array(activity.rating) as _}
+                        {#each Array(Math.max(0, Math.min(5, Math.floor(Number(activity.rating) || 0)))) as _}
                           <span>⭐</span>
                         {/each}
                       </div>

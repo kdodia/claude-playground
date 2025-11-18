@@ -53,9 +53,10 @@
     if (!existingRequest) return false;
     if (existingRequest.lastNudgedAt) return false; // Already nudged
 
-    const requestDate = new Date(existingRequest.createdAt);
-    const now = new Date();
-    const daysSinceRequest = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60 * 24));
+    // Use day boundaries for consistent calculation across timezones
+    const requestDay = new Date(existingRequest.createdAt).setHours(0, 0, 0, 0);
+    const today = new Date().setHours(0, 0, 0, 0);
+    const daysSinceRequest = Math.floor((today - requestDay) / (1000 * 60 * 60 * 24));
 
     return daysSinceRequest >= 3;
   });
@@ -64,9 +65,10 @@
   let daysUntilNudge = $derived.by(() => {
     if (!existingRequest || existingRequest.lastNudgedAt || canNudge) return null;
 
-    const requestDate = new Date(existingRequest.createdAt);
-    const now = new Date();
-    const daysSinceRequest = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60 * 24));
+    // Use day boundaries for consistent calculation across timezones
+    const requestDay = new Date(existingRequest.createdAt).setHours(0, 0, 0, 0);
+    const today = new Date().setHours(0, 0, 0, 0);
+    const daysSinceRequest = Math.floor((today - requestDay) / (1000 * 60 * 60 * 24));
 
     return 3 - daysSinceRequest;
   });

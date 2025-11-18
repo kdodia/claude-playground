@@ -34,6 +34,13 @@
   function submitReturn() {
     if (!selectedLoanId) return;
 
+    // Validate rating is between 1-5
+    if (returnRating < 1 || returnRating > 5) {
+      toast = { message: 'Rating must be between 1 and 5', type: 'error' };
+      setTimeout(() => (toast = null), 3000);
+      return;
+    }
+
     appStore.completeBorrow(selectedLoanId, returnRating, returnReview);
     toast = { message: 'Item marked as returned!', type: 'success' };
     setTimeout(() => (toast = null), 3000);
