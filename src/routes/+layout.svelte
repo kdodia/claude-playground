@@ -93,6 +93,7 @@
 </div>
 
 {#if showResetConfirm}
+  <!-- svelte-ignore a11y_click_events_have_key_events - Modal overlay has onkeydown handler for Escape key -->
   <div class="modal-overlay" onclick={cancelReset} onkeydown={handleModalKeydown} role="presentation">
     <div class="modal-content" bind:this={resetModalElement} onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" tabindex="-1">
       <h2 id="reset-modal-title">Reset App Data?</h2>

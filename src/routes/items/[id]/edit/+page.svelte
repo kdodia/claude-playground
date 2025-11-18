@@ -17,12 +17,18 @@
     }
   });
 
-  // Form state
+  // Form state - Intentionally capturing initial prop values here, then syncing with $effect below
+  /* svelte-ignore state_referenced_locally */
   let name = $state(item?.name || '');
+  /* svelte-ignore state_referenced_locally */
   let description = $state(item?.description || '');
+  /* svelte-ignore state_referenced_locally */
   let imageUrl = $state(item?.imageUrl || '');
+  /* svelte-ignore state_referenced_locally */
   let condition = $state<'excellent' | 'good' | 'fair' | 'poor'>(item?.condition || 'good');
+  /* svelte-ignore state_referenced_locally */
   let permissionLevel = $state<PermissionLevel>(item?.permissionLevel || 'friends');
+  /* svelte-ignore state_referenced_locally */
   let blockedDates = $state<Array<{ startDate: string; endDate: string; reason?: string }>>(
     item?.blockedDates || []
   );

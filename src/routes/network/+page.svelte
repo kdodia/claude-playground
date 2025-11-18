@@ -548,6 +548,7 @@
 </div>
 
 {#if showDeclineModal}
+  <!-- svelte-ignore a11y_click_events_have_key_events - Modal overlay has onkeydown handler for Escape key -->
   <div class="modal-overlay" onclick={cancelDecline} onkeydown={handleModalKeydown} role="presentation">
     <div class="modal-content" bind:this={declineModalElement} onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="decline-modal-title" tabindex="-1">
       <h2 id="decline-modal-title">Decline Friend Request</h2>

@@ -293,6 +293,7 @@
 </div>
 
 {#if showReturnModal}
+  <!-- svelte-ignore a11y_click_events_have_key_events - Modal overlay has onkeydown handler for Escape key -->
   <div class="modal-overlay" onclick={cancelReturn} onkeydown={handleModalKeydown} role="presentation">
     <div class="modal-content" bind:this={returnModalElement} onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="return-modal-title" tabindex="-1">
       <div class="modal-header">
@@ -302,6 +303,7 @@
 
       <div class="modal-body">
         <div class="form-group">
+          <!-- svelte-ignore a11y_label_has_associated_control - Label is associated with radiogroup via aria-labelledby -->
           <label id="rating-label">How was the experience?</label>
           <div class="star-rating" role="radiogroup" aria-labelledby="rating-label">
             {#each [1, 2, 3, 4, 5] as star}
