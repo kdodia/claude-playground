@@ -76,8 +76,10 @@
 
     <div class="filters-section">
       <div class="search-bar">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <label for="search-items" class="sr-only">Search items</label>
         <input
+          id="search-items"
           type="text"
           placeholder="Search items..."
           bind:value={searchQuery}
@@ -113,7 +115,8 @@
             class="view-btn"
             class:active={viewMode === 'grid'}
             onclick={() => (viewMode = 'grid')}
-            title="Grid view"
+            aria-label="Grid view"
+            aria-pressed={viewMode === 'grid'}
           >
             ▦
           </button>
@@ -121,7 +124,8 @@
             class="view-btn"
             class:active={viewMode === 'list'}
             onclick={() => (viewMode = 'list')}
-            title="List view"
+            aria-label="List view"
+            aria-pressed={viewMode === 'list'}
           >
             ☰
           </button>
@@ -144,7 +148,7 @@
       </div>
     {:else}
       <div class="no-results">
-        <span class="no-results-icon">📦</span>
+        <span class="no-results-icon" aria-hidden="true">📦</span>
         <h3>No items found</h3>
         <p>Try adjusting your filters or search query</p>
       </div>

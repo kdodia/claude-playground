@@ -148,7 +148,7 @@
                       <button
                         class="remove-btn"
                         onclick={() => removeItemFromTag(item.id)}
-                        title="Remove from tag"
+                        aria-label="Remove {item.name} from tag"
                       >
                         ✕
                       </button>
@@ -175,7 +175,7 @@
                       <button
                         class="add-btn"
                         onclick={() => addItemToTag(item.id)}
-                        title="Add to tag"
+                        aria-label="Add {item.name} to tag"
                       >
                         +
                       </button>

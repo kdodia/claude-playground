@@ -14,6 +14,7 @@
   ];
 
   let showResetConfirm = $state(false);
+  let resetModalElement = $state<HTMLDivElement | undefined>();
 
   function handleResetData() {
     showResetConfirm = true;
@@ -34,6 +35,13 @@
       cancelReset();
     }
   }
+
+  // Focus modal when it opens
+  $effect(() => {
+    if (showResetConfirm && resetModalElement) {
+      resetModalElement.focus();
+    }
+  });
 </script>
 
 <div class="app">
@@ -58,14 +66,14 @@
       </div>
 
       <div class="nav-actions">
-        <button class="reset-btn" onclick={handleResetData} title="Reset app data">
-          <span>🔄</span>
+        <button class="reset-btn" onclick={handleResetData} aria-label="Reset app data">
+          <span aria-hidden="true">🔄</span>
         </button>
 
-        <a href="/notifications" class="notification-btn">
-          <span>🔔</span>
+        <a href="/notifications" class="notification-btn" aria-label="View notifications{$unreadNotificationsCount > 0 ? `, ${$unreadNotificationsCount} unread` : ''}">
+          <span aria-hidden="true">🔔</span>
           {#if $unreadNotificationsCount > 0}
-            <span class="notification-badge">{$unreadNotificationsCount}</span>
+            <span class="notification-badge" aria-hidden="true">{$unreadNotificationsCount}</span>
           {/if}
         </a>
 
@@ -85,7 +93,7 @@
 
 {#if showResetConfirm}
   <div class="modal-overlay" onclick={cancelReset} onkeydown={handleModalKeydown} role="presentation">
-    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" tabindex="-1">
+    <div class="modal-content" bind:this={resetModalElement} onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" tabindex="-1">
       <h2 id="reset-modal-title">Reset App Data?</h2>
       <p>This will clear all data and reload the app with mock data. This action cannot be undone.</p>
       <div class="modal-actions">

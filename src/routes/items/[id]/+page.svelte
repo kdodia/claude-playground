@@ -402,21 +402,23 @@
             <div class="calendar-grid">
               {#each calendarDates.slice(0, 30) as dateInfo}
                 {@const date = new Date(dateInfo.date)}
-                <div
+                <button
+                  type="button"
                   class="calendar-day"
                   class:booked={dateInfo.booked}
                   class:blocked={dateInfo.blocked}
-                  title={dateInfo.blocked
+                  aria-label={dateInfo.blocked
                     ? `Blocked ${dateInfo.date}`
                     : dateInfo.booked
                     ? `Booked ${dateInfo.date}`
                     : `Available ${dateInfo.date}`}
+                  disabled={dateInfo.booked || dateInfo.blocked}
                 >
                   <div class="day-number">{date.getDate()}</div>
-                  <div class="day-label">
+                  <div class="day-label" aria-hidden="true">
                     {date.toLocaleDateString('en-US', { month: 'short' })}
                   </div>
-                </div>
+                </button>
               {/each}
             </div>
           </div>
@@ -880,19 +882,27 @@
     background-color: rgba(16, 185, 129, 0.1);
     cursor: pointer;
     transition: all var(--transition);
+    border: 1px solid transparent;
   }
 
-  .calendar-day:hover {
+  .calendar-day:hover:not(:disabled) {
     transform: scale(1.05);
   }
 
-  .calendar-day.booked {
+  .calendar-day.booked,
+  .calendar-day:disabled.booked {
     background-color: rgba(239, 68, 68, 0.1);
+    cursor: not-allowed;
   }
 
-  .calendar-day.blocked {
+  .calendar-day.blocked,
+  .calendar-day:disabled.blocked {
     background-color: rgba(107, 114, 128, 0.1);
     cursor: not-allowed;
+  }
+
+  .calendar-day:disabled {
+    opacity: 0.7;
   }
 
   .day-number {

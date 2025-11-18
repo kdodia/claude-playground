@@ -18,6 +18,7 @@
   let showDeclineModal = $state(false);
   let declineRequestId = $state<string | null>(null);
   let declineMessage = $state('');
+  let declineModalElement = $state<HTMLDivElement | undefined>();
 
   // Get users in each tier
   let closeFriends = $derived(
@@ -113,6 +114,13 @@
       cancelDecline();
     }
   }
+
+  // Focus modal when it opens
+  $effect(() => {
+    if (showDeclineModal && declineModalElement) {
+      declineModalElement.focus();
+    }
+  });
 
   function promoteToCloseFriend(friendId: string) {
     if (!currentUser) return;
@@ -541,7 +549,7 @@
 
 {#if showDeclineModal}
   <div class="modal-overlay" onclick={cancelDecline} onkeydown={handleModalKeydown} role="presentation">
-    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="decline-modal-title" tabindex="-1">
+    <div class="modal-content" bind:this={declineModalElement} onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="decline-modal-title" tabindex="-1">
       <h2 id="decline-modal-title">Decline Friend Request</h2>
       <p class="modal-description">Would you like to include a message? (optional)</p>
       <div class="form-group">

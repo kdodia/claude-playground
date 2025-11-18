@@ -62,7 +62,8 @@
           class="view-btn"
           class:active={view === 'grid'}
           onclick={() => (view = 'grid')}
-          title="Grid view"
+          aria-label="Grid view"
+          aria-pressed={view === 'grid'}
         >
           ▦
         </button>
@@ -70,7 +71,8 @@
           class="view-btn"
           class:active={view === 'list'}
           onclick={() => (view = 'list')}
-          title="List view"
+          aria-label="List view"
+          aria-pressed={view === 'list'}
         >
           ☰
         </button>

@@ -248,8 +248,8 @@
               {/if}
             </div>
 
-            <div class="form-group">
-              <label for="condition">Condition *</label>
+            <fieldset class="form-group">
+              <legend>Condition *</legend>
               <div class="radio-group">
                 <label class="radio-label">
                   <input type="radio" bind:group={condition} value="excellent" />
@@ -268,7 +268,7 @@
                   <span class="badge">Poor</span>
                 </label>
               </div>
-            </div>
+            </fieldset>
           </div>
 
           <div class="form-section">

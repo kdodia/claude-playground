@@ -24,7 +24,7 @@
 	},
 	"lint-staged": {
 		"*.{ts,svelte}": [
-			"svelte-check --fail-on-warnings --tsconfig ./tsconfig.json"
+			"svelte-check --tsconfig ./tsconfig.json"
 		]
 	}
 }

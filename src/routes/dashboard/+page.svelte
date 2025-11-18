@@ -13,6 +13,7 @@
   let returnRating = $state(DEFAULT_RATING);
   let returnReview = $state('');
   let hoveredStar = $state(0);
+  let returnModalElement = $state<HTMLDivElement | undefined>();
 
   function approveRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'approved' });
@@ -63,6 +64,13 @@
       cancelReturn();
     }
   }
+
+  // Focus modal when it opens
+  $effect(() => {
+    if (showReturnModal && returnModalElement) {
+      returnModalElement.focus();
+    }
+  });
 </script>
 
 <div class="dashboard-page fade-in">
@@ -274,10 +282,10 @@
 
 {#if showReturnModal}
   <div class="modal-overlay" onclick={cancelReturn} onkeydown={handleModalKeydown} role="presentation">
-    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="return-modal-title" tabindex="-1">
+    <div class="modal-content" bind:this={returnModalElement} onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="return-modal-title" tabindex="-1">
       <div class="modal-header">
         <h2 id="return-modal-title">Mark Item as Returned</h2>
-        <button class="modal-close" onclick={cancelReturn}>✕</button>
+        <button class="modal-close" onclick={cancelReturn} aria-label="Close modal">✕</button>
       </div>
 
       <div class="modal-body">
