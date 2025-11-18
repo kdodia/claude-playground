@@ -20,7 +20,7 @@
 
   function denyRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'denied' });
-    toast = { message: 'Request denied', type: 'error' };
+    toast = { message: 'Request declined', type: 'error' };
     setTimeout(() => (toast = null), 3000);
   }
 
@@ -197,7 +197,7 @@
                       {:else if request.status === 'approved'}
                         <span class="badge badge-success">✓ Approved</span>
                       {:else if request.status === 'denied'}
-                        <span class="badge badge-error">✗ Denied</span>
+                        <span class="badge badge-error">✗ Declined</span>
                       {/if}
                     </div>
                   </div>

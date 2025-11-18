@@ -127,8 +127,8 @@ function createAppStore() {
             id: `notif-${Date.now()}`,
             userId: request.borrowerId,
             type: 'request-denied',
-            title: 'Request Denied',
-            message: `${lender?.name} denied your request to borrow ${item?.name}`,
+            title: 'Request Declined',
+            message: `${lender?.name} declined your request to borrow ${item?.name}`,
             read: false,
             createdAt: new Date().toISOString(),
             relatedId: requestId

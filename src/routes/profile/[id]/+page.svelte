@@ -131,7 +131,7 @@
                       {:else if status === 'pending'}
                         <span class="badge badge-warning">Pending</span>
                       {:else if status === 'denied'}
-                        <span class="badge badge-error">Denied</span>
+                        <span class="badge badge-error">Declined</span>
                       {:else if status === 'cancelled'}
                         <span class="badge">Cancelled</span>
                       {/if}
