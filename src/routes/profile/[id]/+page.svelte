@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { appStore } from '$lib/store';
-  import { canUserViewItem } from '$lib/permissions';
+  import { appStore, canUserViewItem } from '$lib/store';
   import ItemCard from '$lib/components/ItemCard.svelte';
 
   let userId = $derived($page.params.id);
