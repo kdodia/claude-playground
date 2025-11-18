@@ -22,14 +22,24 @@
     )
   );
 
-  // Combine requests and completed history, sorted by date (most recent first)
-  let allActivity = $derived(
-    [...borrowRequests, ...borrowHistory].sort((a, b) => {
+  // Separate lending and borrowing activities
+  let lendingActivity = $derived(
+    [...borrowRequests.filter(r => r.lenderId === userId), ...borrowHistory.filter(h => h.lenderId === userId)].sort((a, b) => {
       const dateA = 'createdAt' in a ? new Date(a.createdAt).getTime() : new Date(a.endDate).getTime();
       const dateB = 'createdAt' in b ? new Date(b.createdAt).getTime() : new Date(b.endDate).getTime();
       return dateB - dateA;
     })
   );
+
+  let borrowingActivity = $derived(
+    [...borrowRequests.filter(r => r.borrowerId === userId), ...borrowHistory.filter(h => h.borrowerId === userId)].sort((a, b) => {
+      const dateA = 'createdAt' in a ? new Date(a.createdAt).getTime() : new Date(a.endDate).getTime();
+      const dateB = 'createdAt' in b ? new Date(b.createdAt).getTime() : new Date(b.endDate).getTime();
+      return dateB - dateA;
+    })
+  );
+
+  let activityTab = $state<'lending' | 'borrowing'>('borrowing');
 
   let isCurrentUser = $derived(userId === $appStore.currentUserId);
   let isFriend = $derived(currentUser?.friendIds.includes(userId || '') || false);
@@ -102,16 +112,41 @@
           {/if}
         </section>
 
-        {#if allActivity.length > 0}
+        {#if lendingActivity.length > 0 || borrowingActivity.length > 0}
           <section class="history-section">
             <h2 class="section-title">Activity History</h2>
+
+            <div class="activity-tabs">
+              <button
+                class="activity-tab"
+                class:active={activityTab === 'borrowing'}
+                onclick={() => (activityTab = 'borrowing')}
+              >
+                <span>📤</span>
+                <span>Borrowing</span>
+                {#if borrowingActivity.length > 0}
+                  <span class="tab-badge">{borrowingActivity.length}</span>
+                {/if}
+              </button>
+              <button
+                class="activity-tab"
+                class:active={activityTab === 'lending'}
+                onclick={() => (activityTab = 'lending')}
+              >
+                <span>📥</span>
+                <span>Lending</span>
+                {#if lendingActivity.length > 0}
+                  <span class="tab-badge">{lendingActivity.length}</span>
+                {/if}
+              </button>
+            </div>
+
             <div class="history-list">
-              {#each allActivity.slice(0, 10) as activity}
+              {#each (activityTab === 'borrowing' ? borrowingActivity : lendingActivity).slice(0, 10) as activity}
                 {@const item = $appStore.items.find((i) => i.id === activity.itemId)}
                 {@const otherUser = $appStore.users.find(
-                  (u) => u.id === (activity.borrowerId === userId ? activity.lenderId : activity.borrowerId)
+                  (u) => u.id === (activityTab === 'borrowing' ? activity.lenderId : activity.borrowerId)
                 )}
-                {@const wasBorrower = activity.borrowerId === userId}
                 {@const status = 'status' in activity ? activity.status : 'completed'}
                 {@const isRequest = 'status' in activity}
                 <div class="history-item" class:active-item={status === 'active' || status === 'approved'}>
@@ -120,9 +155,9 @@
                   </a>
                   <div class="history-details">
                     <div class="history-action">
-                      <span>{wasBorrower ? '📤 Borrowed' : '📥 Lent'}</span>
+                      <span>{activityTab === 'borrowing' ? '📤 Borrowed' : '📥 Lent'}</span>
                       <a href="/items/{item?.id}" class="history-link"><strong>{item?.name}</strong></a>
-                      <span>{wasBorrower ? 'from' : 'to'}</span>
+                      <span>{activityTab === 'borrowing' ? 'from' : 'to'}</span>
                       <a href="/profile/{otherUser?.id}" class="history-link"><strong>{otherUser?.name}</strong></a>
                       {#if status === 'active'}
                         <span class="badge badge-success">Active</span>
@@ -276,6 +311,48 @@
 
   .history-section {
     margin-top: 3rem;
+  }
+
+  .activity-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .activity-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all var(--transition);
+  }
+
+  .activity-tab:hover {
+    color: var(--text-primary);
+    background-color: var(--surface);
+  }
+
+  .activity-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  .activity-tab .tab-badge {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
   }
 
   .history-list {
