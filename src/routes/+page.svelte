@@ -11,6 +11,8 @@
   // Derived filtered items
   let filteredItems = $derived.by(() => {
     let items = $appStore.items.filter((item) =>
+      // Filter out user's own items and items they don't have permission to view
+      item.lenderId !== $appStore.currentUserId &&
       canUserViewItem(item, $appStore.currentUserId, $appStore)
     );
 

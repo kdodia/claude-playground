@@ -44,6 +44,7 @@
   let isCurrentUser = $derived(userId === $appStore.currentUserId);
   let isFriend = $derived(currentUser?.friendIds.includes(userId || '') || false);
   let isCloseFriend = $derived(currentUser?.closeFriendIds.includes(userId || '') || false);
+  let theyMarkedMeCloseFriend = $derived(user?.closeFriendIds.includes($appStore.currentUserId) || false);
 </script>
 
 {#if !user}
@@ -86,6 +87,9 @@
               <span class="badge badge-success">Close Friend</span>
             {:else if isFriend}
               <span class="badge badge-primary">Friend</span>
+            {/if}
+            {#if !isCurrentUser && theyMarkedMeCloseFriend}
+              <span class="badge badge-success">💚 Their Close Friend</span>
             {/if}
           </div>
         </div>

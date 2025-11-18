@@ -23,7 +23,7 @@
   <div class="container">
     <header class="page-header">
       <div>
-        <h1 class="page-title">My Items</h1>
+        <h1 class="page-title">My Library</h1>
         <p class="page-subtitle">Manage the things you're sharing with your community</p>
       </div>
       <button class="btn btn-primary" onclick={() => goto('/add-item')}>

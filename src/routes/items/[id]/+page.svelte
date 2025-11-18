@@ -33,9 +33,19 @@
   let requestMessage = $state('');
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // Check if current user has already requested this item
+  let existingRequest = $derived(
+    $appStore.borrowRequests.find(
+      (req) =>
+        req.itemId === itemId &&
+        req.borrowerId === $appStore.currentUserId &&
+        req.status === 'pending'
+    )
+  );
+
   // Check if current user can request this item
   let canRequest = $derived(
-    item && currentUser && item.lenderId !== $appStore.currentUserId && item.available
+    item && currentUser && item.lenderId !== $appStore.currentUserId && item.available && !existingRequest
   );
 
   function openRequestForm() {
@@ -195,7 +205,32 @@
               </div>
             {/if}
 
-            {#if canRequest}
+            {#if existingRequest}
+              <div class="action-section">
+                <div class="request-status-card">
+                  <div class="request-status-header">
+                    <span class="status-icon">⏳</span>
+                    <div>
+                      <h4>Request Sent</h4>
+                      <p class="request-status-date">
+                        Sent {new Date(existingRequest.createdAt).toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  {#if existingRequest.message}
+                    <p class="request-status-message">"{existingRequest.message}"</p>
+                  {/if}
+                  <div class="request-status-dates">
+                    <span>📅 {new Date(existingRequest.startDate).toLocaleDateString()} - {new Date(existingRequest.endDate).toLocaleDateString()}</span>
+                  </div>
+                  <p class="request-status-info">Waiting for {lender?.name} to respond to your request</p>
+                </div>
+              </div>
+            {:else if canRequest}
               <div class="action-section">
                 {#if !showRequestForm}
                   <button class="btn btn-primary btn-lg" onclick={openRequestForm}>
@@ -565,6 +600,64 @@
     display: flex;
     gap: 1rem;
     margin-top: 1.5rem;
+  }
+
+  .request-status-card {
+    background-color: var(--surface);
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border);
+  }
+
+  .request-status-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .status-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  .request-status-card h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .request-status-date {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .request-status-message {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin: 0 0 1rem 0;
+    padding: 0.75rem;
+    background-color: var(--background);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--primary);
+  }
+
+  .request-status-dates {
+    padding: 0.75rem;
+    background-color: var(--background);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .request-status-info {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-align: center;
   }
 
   .calendar-section,
