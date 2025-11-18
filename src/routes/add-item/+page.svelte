@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import Toast from '$lib/components/Toast.svelte';
   import type { Item, PermissionLevel } from '$lib/types';
+  import { TOAST_DURATION_MS } from '$lib/constants';
 
   let name = $state('');
   let description = $state('');
@@ -35,7 +36,7 @@
   function handleSubmit() {
     if (!isValid) {
       toast = { message: 'Please fill in all required fields', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 

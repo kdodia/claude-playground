@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import Toast from '$lib/components/Toast.svelte';
   import type { BorrowRequest } from '$lib/types';
+  import { NUDGE_DELAY_DAYS, CALENDAR_PREVIEW_DAYS, TOAST_DURATION_MS } from '$lib/constants';
 
   let itemId = $derived($page.params.id);
   let item = $derived($appStore.items.find((i) => i.id === itemId));
@@ -48,7 +49,7 @@
     item && currentUser && item.lenderId !== $appStore.currentUserId && item.available && !existingRequest
   );
 
-  // Check if nudge button should be shown (3+ days after request, not already nudged)
+  // Check if nudge button should be shown (NUDGE_DELAY_DAYS after request, not already nudged)
   let canNudge = $derived.by(() => {
     if (!existingRequest) return false;
     if (existingRequest.lastNudgedAt) return false; // Already nudged
@@ -58,7 +59,7 @@
     const today = new Date().setHours(0, 0, 0, 0);
     const daysSinceRequest = Math.floor((today - requestDay) / (1000 * 60 * 60 * 24));
 
-    return daysSinceRequest >= 3;
+    return daysSinceRequest >= NUDGE_DELAY_DAYS;
   });
 
   // Calculate days remaining until nudge is available
@@ -70,7 +71,7 @@
     const today = new Date().setHours(0, 0, 0, 0);
     const daysSinceRequest = Math.floor((today - requestDay) / (1000 * 60 * 60 * 24));
 
-    return 3 - daysSinceRequest;
+    return NUDGE_DELAY_DAYS - daysSinceRequest;
   });
 
   // Calculate the date when nudge becomes available
@@ -79,7 +80,7 @@
 
     const requestDate = new Date(existingRequest.createdAt);
     const availableDate = new Date(requestDate);
-    availableDate.setDate(availableDate.getDate() + 3);
+    availableDate.setDate(availableDate.getDate() + NUDGE_DELAY_DAYS);
 
     return availableDate;
   });
@@ -96,7 +97,7 @@
     if (!existingRequest) return;
     appStore.nudgeRequest(existingRequest.id);
     toast = { message: 'Reminder sent!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function submitRequest() {
@@ -105,7 +106,7 @@
     // Validate that end date is after start date
     if (new Date(endDate) <= new Date(startDate)) {
       toast = { message: 'End date must be after start date', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 
@@ -146,12 +147,12 @@
     });
   }
 
-  // Generate next 90 days for calendar
+  // Generate next CALENDAR_PREVIEW_DAYS for calendar
   let calendarDates = $derived.by(() => {
     const dates: Array<{ date: string; booked: boolean; blocked: boolean; borrow?: BorrowRequest }> = [];
     const today = new Date();
 
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < CALENDAR_PREVIEW_DAYS; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];

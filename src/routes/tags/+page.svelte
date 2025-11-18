@@ -2,6 +2,7 @@
   import { appStore } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
   import type { Tag } from '$lib/types';
+  import { TOAST_DURATION_MS } from '$lib/constants';
 
   let showCreateForm = $state(false);
   let newTagName = $state('');
@@ -46,21 +47,21 @@
     showCreateForm = false;
     selectedTagId = tag.id;
 
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function addItemToTag(itemId: string) {
     if (!selectedTagId) return;
     appStore.addItemToTag(selectedTagId, itemId);
     toast = { message: 'Item added to tag!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function removeItemFromTag(itemId: string) {
     if (!selectedTagId) return;
     appStore.removeItemFromTag(selectedTagId, itemId);
     toast = { message: 'Item removed from tag', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 </script>
 

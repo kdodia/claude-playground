@@ -1,6 +1,7 @@
 <script lang="ts">
   import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
+  import { TOAST_DURATION_MS, MAX_RATING, MIN_RATING, DEFAULT_RATING } from '$lib/constants';
 
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -8,25 +9,25 @@
   // Return modal state
   let showReturnModal = $state(false);
   let selectedLoanId = $state<string | null>(null);
-  let returnRating = $state(5);
+  let returnRating = $state(DEFAULT_RATING);
   let returnReview = $state('');
   let hoveredStar = $state(0);
 
   function approveRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'approved' });
     toast = { message: 'Request approved!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function denyRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'denied' });
     toast = { message: 'Request declined', type: 'error' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function markAsReturned(requestId: string) {
     selectedLoanId = requestId;
-    returnRating = 5;
+    returnRating = DEFAULT_RATING;
     returnReview = '';
     showReturnModal = true;
   }
@@ -34,28 +35,28 @@
   function submitReturn() {
     if (!selectedLoanId) return;
 
-    // Validate rating is between 1-5
-    if (returnRating < 1 || returnRating > 5) {
-      toast = { message: 'Rating must be between 1 and 5', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+    // Validate rating is within valid range
+    if (returnRating < MIN_RATING || returnRating > MAX_RATING) {
+      toast = { message: `Rating must be between ${MIN_RATING} and ${MAX_RATING}`, type: 'error' };
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 
     appStore.completeBorrow(selectedLoanId, returnRating, returnReview);
     toast = { message: 'Item marked as returned!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
 
     // Reset modal state
     showReturnModal = false;
     selectedLoanId = null;
-    returnRating = 5;
+    returnRating = DEFAULT_RATING;
     returnReview = '';
   }
 
   function cancelReturn() {
     showReturnModal = false;
     selectedLoanId = null;
-    returnRating = 5;
+    returnRating = DEFAULT_RATING;
     returnReview = '';
   }
 </script>

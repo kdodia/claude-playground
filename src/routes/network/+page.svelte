@@ -1,6 +1,7 @@
 <script lang="ts">
   import { appStore, incomingFriendRequests } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
+  import { TOAST_DURATION_MS } from '$lib/constants';
 
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -69,19 +70,19 @@
 
     if (existingRequest) {
       toast = { message: 'Friend request already exists', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 
     appStore.sendFriendRequest(currentUser.id, toUserId);
     toast = { message: 'Friend request sent!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function acceptFriendRequest(requestId: string) {
     appStore.acceptFriendRequest(requestId);
     toast = { message: 'Friend request accepted!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function openDeclineModal(requestId: string) {
@@ -101,7 +102,7 @@
     // TODO: Update declineFriendRequest to accept optional message
     appStore.declineFriendRequest(declineRequestId);
     toast = { message: 'Friend request declined', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
     cancelDecline();
   }
 
@@ -109,14 +110,14 @@
     if (!currentUser) return;
     appStore.promoteToCloseFriend(currentUser.id, friendId);
     toast = { message: 'Promoted to close friend!', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function demoteFromCloseFriend(friendId: string) {
     if (!currentUser) return;
     appStore.demoteFromCloseFriend(currentUser.id, friendId);
     toast = { message: 'Removed from close friends', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   // Helper to check if friend request already sent

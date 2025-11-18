@@ -4,6 +4,7 @@
   import { goto } from '$app/navigation';
   import Toast from '$lib/components/Toast.svelte';
   import type { Item, PermissionLevel } from '$lib/types';
+  import { TOAST_DURATION_MS } from '$lib/constants';
 
   let itemId = $derived($page.params.id);
   let item = $derived($appStore.items.find((i) => i.id === itemId));
@@ -82,14 +83,14 @@
   function addBlockedDate() {
     if (!blockStartDate || !blockEndDate) {
       toast = { message: 'Please select both start and end dates', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 
     // Validate that end date is after start date
     if (new Date(blockEndDate) < new Date(blockStartDate)) {
       toast = { message: 'End date must be after start date', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 
@@ -109,13 +110,13 @@
     showDateBlockForm = false;
 
     toast = { message: 'Date blocked successfully', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function removeBlockedDate(index: number) {
     blockedDates = blockedDates.filter((_, i) => i !== index);
     toast = { message: 'Date block removed', type: 'success' };
-    setTimeout(() => (toast = null), 3000);
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
 
   function handleSubmit() {
@@ -123,7 +124,7 @@
 
     if (!name.trim() || !description.trim() || !imageUrl.trim() || !categoryId) {
       toast = { message: 'Please fill in all required fields', type: 'error' };
-      setTimeout(() => (toast = null), 3000);
+      setTimeout(() => (toast = null), TOAST_DURATION_MS);
       return;
     }
 
