@@ -245,8 +245,7 @@
                     </div>
                     <div class="request-dates">
                       <span>📅</span>
-                      {@const isOverdue = new Date(loan.endDate) < new Date()}
-                      <span class:overdue={isOverdue}
+                      <span class:overdue={new Date(loan.endDate) < new Date()}
                         >Return by: {new Date(loan.endDate).toLocaleDateString()}</span
                       >
                     </div>
