@@ -107,6 +107,13 @@
     cancelDecline();
   }
 
+  // Handle escape key for modal
+  function handleModalKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      cancelDecline();
+    }
+  }
+
   function promoteToCloseFriend(friendId: string) {
     if (!currentUser) return;
     appStore.promoteToCloseFriend(currentUser.id, friendId);
@@ -533,9 +540,9 @@
 </div>
 
 {#if showDeclineModal}
-  <div class="modal-overlay" onclick={cancelDecline}>
-    <div class="modal-content" onclick={(e) => e.stopPropagation()}>
-      <h2>Decline Friend Request</h2>
+  <div class="modal-overlay" onclick={cancelDecline} onkeydown={handleModalKeydown} role="presentation">
+    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="decline-modal-title" tabindex="-1">
+      <h2 id="decline-modal-title">Decline Friend Request</h2>
       <p class="modal-description">Would you like to include a message? (optional)</p>
       <div class="form-group">
         <textarea

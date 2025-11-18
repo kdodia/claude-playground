@@ -27,6 +27,13 @@
   function cancelReset() {
     showResetConfirm = false;
   }
+
+  // Handle escape key for modal
+  function handleModalKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      cancelReset();
+    }
+  }
 </script>
 
 <div class="app">
@@ -77,9 +84,9 @@
 </div>
 
 {#if showResetConfirm}
-  <div class="modal-overlay" onclick={cancelReset}>
-    <div class="modal-content" onclick={(e) => e.stopPropagation()}>
-      <h2>Reset App Data?</h2>
+  <div class="modal-overlay" onclick={cancelReset} onkeydown={handleModalKeydown} role="presentation">
+    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="reset-modal-title" tabindex="-1">
+      <h2 id="reset-modal-title">Reset App Data?</h2>
       <p>This will clear all data and reload the app with mock data. This action cannot be undone.</p>
       <div class="modal-actions">
         <button class="btn btn-error" onclick={confirmReset}>Reset Data</button>

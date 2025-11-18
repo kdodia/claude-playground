@@ -56,6 +56,13 @@
     returnRating = DEFAULT_RATING;
     returnReview = '';
   }
+
+  // Handle escape key for modal
+  function handleModalKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      cancelReturn();
+    }
+  }
 </script>
 
 <div class="dashboard-page fade-in">
@@ -266,10 +273,10 @@
 </div>
 
 {#if showReturnModal}
-  <div class="modal-overlay" onclick={cancelReturn}>
-    <div class="modal-content" onclick={(e) => e.stopPropagation()}>
+  <div class="modal-overlay" onclick={cancelReturn} onkeydown={handleModalKeydown} role="presentation">
+    <div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="return-modal-title" tabindex="-1">
       <div class="modal-header">
-        <h2>Mark Item as Returned</h2>
+        <h2 id="return-modal-title">Mark Item as Returned</h2>
         <button class="modal-close" onclick={cancelReturn}>✕</button>
       </div>
 

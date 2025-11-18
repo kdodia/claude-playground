@@ -187,8 +187,8 @@
         <div class="form-section">
           <h3>Who Can Borrow This?</h3>
 
-          <div class="form-group">
-            <label>Permission Level</label>
+          <fieldset class="form-group">
+            <legend>Permission Level</legend>
             <div class="radio-group-vertical">
               <label class="radio-label-vertical">
                 <input type="radio" bind:group={permissionLevel} value="close-friends" />
@@ -219,7 +219,7 @@
                 </div>
               </label>
             </div>
-          </div>
+          </fieldset>
         </div>
 
         <div class="form-actions">
