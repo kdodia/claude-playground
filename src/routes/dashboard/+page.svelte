@@ -5,7 +5,7 @@
   import { useToast } from '$lib/useToast';
 
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
-  const { toast, showToast } = useToast();
+  const { toast, showToast, clearToast } = useToast();
 
   // Return modal state
   let showReturnModal = $state(false);
@@ -315,7 +315,7 @@
 {/if}
 
 {#if toast}
-  <Toast message={toast.message} type={toast.type} onClose={() => (toast = null)} />
+  <Toast message={toast.message} type={toast.type} onClose={clearToast} />
 {/if}
 
 <style>
