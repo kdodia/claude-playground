@@ -416,6 +416,11 @@ export const outgoingFriendRequests = derived(appStore, ($state) =>
   $state.friendRequests.filter((req) => req.fromUserId === $state.currentUserId)
 );
 
+// Derived store for items the current user can view
+export const visibleItems = derived(appStore, ($state) =>
+  $state.items.filter((item) => canUserViewItem(item, $state.currentUserId, $state))
+);
+
 // Helper function to check if a user can view an item
 export function canUserViewItem(item: Item, currentUserId: string, state: AppState): boolean {
   if (item.lenderId === currentUserId) return true;
@@ -460,4 +465,26 @@ export function getCategoryPath(categoryId: string, state: AppState): string[] {
   }
 
   return path;
+}
+
+// Helper to get permission level display info
+export function getPermissionLevelInfo(permissionLevel: string): {
+  label: string;
+  icon: string;
+  color: string;
+} {
+  switch (permissionLevel) {
+    case 'close-friends':
+      return { label: 'Close Friends', icon: '💚', color: '#10b981' };
+    case 'friends':
+      return { label: 'Friends', icon: '👥', color: '#3b82f6' };
+    case 'friends-of-friends':
+      return { label: 'Friends of Friends', icon: '🔗', color: '#8b5cf6' };
+    case 'neighbors':
+      return { label: 'Neighbors', icon: '🏘️', color: '#f59e0b' };
+    case 'specific-users':
+      return { label: 'Specific People', icon: '🔒', color: '#6b7280' };
+    default:
+      return { label: 'Unknown', icon: '❓', color: '#6b7280' };
+  }
 }

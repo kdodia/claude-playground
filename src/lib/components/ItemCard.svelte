@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Item, User } from '$lib/types';
-  import { appStore } from '$lib/store';
+  import { appStore, getPermissionLevelInfo } from '$lib/store';
   import { derived } from 'svelte/store';
 
   interface Props {
@@ -12,11 +12,17 @@
   const lender = derived(appStore, ($state) =>
     $state.users.find((u) => u.id === item.lenderId)
   );
+
+  const permissionInfo = $derived(getPermissionLevelInfo(item.permissionLevel));
 </script>
 
 <a href="/items/{item.id}" class="item-card card">
   <div class="item-image">
     <img src={item.imageUrl} alt={item.name} />
+    <div class="permission-badge" style="background-color: {permissionInfo.color};">
+      <span>{permissionInfo.icon}</span>
+      <span>{permissionInfo.label}</span>
+    </div>
     {#if !item.available}
       <div class="unavailable-badge">Currently Borrowed</div>
     {/if}
@@ -79,6 +85,22 @@
 
   .item-card:hover .item-image img {
     transform: scale(1.05);
+  }
+
+  .permission-badge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .unavailable-badge {

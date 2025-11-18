@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { appStore, getCategoryPath } from '$lib/store';
+  import { appStore, getCategoryPath, getPermissionLevelInfo } from '$lib/store';
   import { goto } from '$app/navigation';
   import Toast from '$lib/components/Toast.svelte';
   import type { BorrowRequest } from '$lib/types';
@@ -10,6 +10,7 @@
   let lender = $derived($appStore.users.find((u) => u.id === item?.lenderId));
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
   let categoryPath = $derived(item ? getCategoryPath(item.categoryId, $appStore) : []);
+  let permissionInfo = $derived(item ? getPermissionLevelInfo(item.permissionLevel) : null);
 
   // Get borrowing history for this item
   let history = $derived(
@@ -154,6 +155,29 @@
                 </div>
               </div>
             </div>
+
+            {#if permissionInfo}
+              <div class="permission-card">
+                <div class="permission-header">
+                  <span class="permission-icon">{permissionInfo.icon}</span>
+                  <div>
+                    <h4>Who Can Borrow This</h4>
+                    <p class="permission-level">{permissionInfo.label}</p>
+                  </div>
+                </div>
+                <p class="permission-description">
+                  {#if item.permissionLevel === 'close-friends'}
+                    This item is available only to {lender?.name}'s close friends
+                  {:else if item.permissionLevel === 'friends'}
+                    This item is available to all of {lender?.name}'s friends
+                  {:else if item.permissionLevel === 'friends-of-friends'}
+                    This item is available to friends and their extended network
+                  {:else if item.permissionLevel === 'neighbors'}
+                    This item is available to anyone in {lender?.address?.city}
+                  {/if}
+                </p>
+              </div>
+            {/if}
 
             <div class="item-description">
               <h3>Description</h3>
@@ -397,7 +421,7 @@
     padding: 1.5rem;
     background-color: var(--surface);
     border-radius: var(--radius-lg);
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .lender-avatar-large {
@@ -406,6 +430,47 @@
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--primary);
+  }
+
+  .permission-card {
+    padding: 1.5rem;
+    background-color: var(--surface);
+    border-radius: var(--radius-lg);
+    margin-bottom: 2rem;
+    border: 2px solid var(--border);
+  }
+
+  .permission-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .permission-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+  }
+
+  .permission-card h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .permission-level {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .permission-description {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
   }
 
   .lender-label {
