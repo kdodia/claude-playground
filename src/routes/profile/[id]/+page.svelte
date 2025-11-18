@@ -8,17 +8,17 @@
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
 
   let userItems = $derived(
-    $appStore.items.filter((item) => item.ownerId === userId && item.available)
+    $appStore.items.filter((item) => item.lenderId === userId && item.available)
   );
 
   let borrowHistory = $derived(
-    $appStore.borrowHistory.filter((h) => h.borrowerId === userId || h.ownerId === userId)
+    $appStore.borrowHistory.filter((h) => h.borrowerId === userId || h.lenderId === userId)
   );
 
   // Get active borrows for this user
   let activeBorrows = $derived(
     $appStore.borrowRequests.filter(
-      (r) => (r.borrowerId === userId || r.ownerId === userId) && (r.status === 'active' || r.status === 'approved')
+      (r) => (r.borrowerId === userId || r.lenderId === userId) && (r.status === 'active' || r.status === 'approved')
     )
   );
 
@@ -103,7 +103,7 @@
               {#each allActivity.slice(0, 10) as activity}
                 {@const item = $appStore.items.find((i) => i.id === activity.itemId)}
                 {@const otherUser = $appStore.users.find(
-                  (u) => u.id === (activity.borrowerId === userId ? activity.ownerId : activity.borrowerId)
+                  (u) => u.id === (activity.borrowerId === userId ? activity.lenderId : activity.borrowerId)
                 )}
                 {@const wasBorrower = activity.borrowerId === userId}
                 {@const isActive = 'status' in activity && (activity.status === 'active' || activity.status === 'approved')}

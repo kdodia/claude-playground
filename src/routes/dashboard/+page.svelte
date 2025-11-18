@@ -140,7 +140,7 @@
           {:else}
             {#each $outgoingRequests as request}
               {@const item = $appStore.items.find((i) => i.id === request.itemId)}
-              {@const owner = $appStore.users.find((u) => u.id === request.ownerId)}
+              {@const lender = $appStore.users.find((u) => u.id === request.lenderId)}
               <div class="request-card card">
                 <div class="request-content">
                   <a href="/items/{item?.id}" class="request-item-link">
@@ -152,9 +152,9 @@
                     </a>
                     <div class="request-meta">
                       <span>Requested from</span>
-                      <a href="/profile/{owner?.id}" class="user-link">
-                        <img src={owner?.profilePic} alt={owner?.name} class="borrower-avatar" />
-                        <span class="borrower-name">{owner?.name}</span>
+                      <a href="/profile/{lender?.id}" class="user-link">
+                        <img src={lender?.profilePic} alt={lender?.name} class="borrower-avatar" />
+                        <span class="borrower-name">{lender?.name}</span>
                       </a>
                     </div>
                     <div class="request-dates">

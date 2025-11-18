@@ -38,7 +38,7 @@ export interface BorrowRequest {
   id: string;
   itemId: string;
   borrowerId: string;
-  ownerId: string;
+  lenderId: string;
   startDate: string;
   endDate: string;
   status: 'pending' | 'approved' | 'denied' | 'active' | 'completed' | 'cancelled';
@@ -50,7 +50,7 @@ export interface BorrowHistory {
   id: string;
   itemId: string;
   borrowerId: string;
-  ownerId: string;
+  lenderId: string;
   startDate: string;
   endDate: string;
   actualReturnDate?: string;
@@ -63,7 +63,7 @@ export interface Item {
   name: string;
   description: string;
   categoryId: string;
-  ownerId: string;
+  lenderId: string;
   imageUrl: string;
   condition: 'excellent' | 'good' | 'fair' | 'poor';
   permissionLevel: PermissionLevel;

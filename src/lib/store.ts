@@ -76,13 +76,13 @@ function createAppStore() {
     // Borrow request actions
     createBorrowRequest: (request: BorrowRequest) => {
       update((state) => {
-        // Create notification for owner
+        // Create notification for lender
         const item = state.items.find((i) => i.id === request.itemId);
         const borrower = state.users.find((u) => u.id === request.borrowerId);
 
         const notification: Notification = {
           id: `notif-${Date.now()}`,
-          userId: request.ownerId,
+          userId: request.lenderId,
           type: 'borrow-request',
           title: 'New Borrow Request',
           message: `${borrower?.name} wants to borrow your ${item?.name}`,
@@ -106,7 +106,7 @@ function createAppStore() {
 
         const updatedRequest = { ...request, ...updates };
         const item = state.items.find((i) => i.id === request.itemId);
-        const owner = state.users.find((u) => u.id === request.ownerId);
+        const lender = state.users.find((u) => u.id === request.lenderId);
 
         let notification: Notification | null = null;
 
@@ -117,7 +117,7 @@ function createAppStore() {
             userId: request.borrowerId,
             type: 'request-approved',
             title: 'Request Approved!',
-            message: `${owner?.name} approved your request to borrow ${item?.name}`,
+            message: `${lender?.name} approved your request to borrow ${item?.name}`,
             read: false,
             createdAt: new Date().toISOString(),
             relatedId: requestId
@@ -128,7 +128,7 @@ function createAppStore() {
             userId: request.borrowerId,
             type: 'request-denied',
             title: 'Request Denied',
-            message: `${owner?.name} denied your request to borrow ${item?.name}`,
+            message: `${lender?.name} denied your request to borrow ${item?.name}`,
             read: false,
             createdAt: new Date().toISOString(),
             relatedId: requestId
@@ -157,7 +157,7 @@ function createAppStore() {
           id: `hist-${Date.now()}`,
           itemId: request.itemId,
           borrowerId: request.borrowerId,
-          ownerId: request.ownerId,
+          lenderId: request.lenderId,
           startDate: request.startDate,
           endDate: request.endDate,
           actualReturnDate: new Date().toISOString().split('T')[0],
@@ -258,7 +258,7 @@ export const currentUser = derived(appStore, ($state) =>
 );
 
 export const currentUserItems = derived(appStore, ($state) =>
-  $state.items.filter((item) => item.ownerId === $state.currentUserId)
+  $state.items.filter((item) => item.lenderId === $state.currentUserId)
 );
 
 export const currentUserNotifications = derived(appStore, ($state) =>
@@ -273,7 +273,7 @@ export const unreadNotificationsCount = derived(currentUserNotifications, ($noti
 
 export const incomingRequests = derived(appStore, ($state) =>
   $state.borrowRequests.filter(
-    (req) => req.ownerId === $state.currentUserId && req.status === 'pending'
+    (req) => req.lenderId === $state.currentUserId && req.status === 'pending'
   )
 );
 
@@ -283,36 +283,36 @@ export const outgoingRequests = derived(appStore, ($state) =>
 
 export const activeLoans = derived(appStore, ($state) =>
   $state.borrowRequests.filter(
-    (req) => req.ownerId === $state.currentUserId && req.status === 'active'
+    (req) => req.lenderId === $state.currentUserId && req.status === 'active'
   )
 );
 
 // Helper function to check if a user can view an item
 export function canUserViewItem(item: Item, currentUserId: string, state: AppState): boolean {
-  if (item.ownerId === currentUserId) return true;
+  if (item.lenderId === currentUserId) return true;
 
-  const owner = state.users.find((u) => u.id === item.ownerId);
-  if (!owner) return false;
+  const lender = state.users.find((u) => u.id === item.lenderId);
+  if (!lender) return false;
 
   switch (item.permissionLevel) {
     case 'specific-users':
       return item.allowedUserIds?.includes(currentUserId) || false;
     case 'close-friends':
-      return owner.closeFriendIds.includes(currentUserId);
+      return lender.closeFriendIds.includes(currentUserId);
     case 'friends':
-      return owner.friendIds.includes(currentUserId);
+      return lender.friendIds.includes(currentUserId);
     case 'friends-of-friends':
-      // Check if any of user's friends are friends with the owner
+      // Check if any of user's friends are friends with the lender
       const currentUserData = state.users.find((u) => u.id === currentUserId);
       if (!currentUserData) return false;
       return (
-        owner.friendIds.includes(currentUserId) ||
-        currentUserData.friendIds.some((friendId) => owner.friendIds.includes(friendId))
+        lender.friendIds.includes(currentUserId) ||
+        currentUserData.friendIds.some((friendId) => lender.friendIds.includes(friendId))
       );
     case 'neighbors':
       // For simplicity, all users in same city are neighbors
       const currentUserAddress = state.users.find((u) => u.id === currentUserId)?.address;
-      return currentUserAddress?.city === owner.address?.city;
+      return currentUserAddress?.city === lender.address?.city;
     default:
       return false;
   }

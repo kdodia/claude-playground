@@ -7,7 +7,7 @@
 
   let itemId = $derived($page.params.id);
   let item = $derived($appStore.items.find((i) => i.id === itemId));
-  let owner = $derived($appStore.users.find((u) => u.id === item?.ownerId));
+  let lender = $derived($appStore.users.find((u) => u.id === item?.lenderId));
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
   let categoryPath = $derived(item ? getCategoryPath(item.categoryId, $appStore) : []);
 
@@ -34,7 +34,7 @@
 
   // Check if current user can request this item
   let canRequest = $derived(
-    item && currentUser && item.ownerId !== $appStore.currentUserId && item.available
+    item && currentUser && item.lenderId !== $appStore.currentUserId && item.available
   );
 
   function openRequestForm() {
@@ -52,7 +52,7 @@
       id: `req-${Date.now()}`,
       itemId: item.id,
       borrowerId: $appStore.currentUserId,
-      ownerId: item.ownerId,
+      lenderId: item.lenderId,
       startDate,
       endDate,
       status: 'pending',
@@ -142,15 +142,15 @@
               <span class="badge badge-primary">{item.condition}</span>
             </div>
 
-            <div class="owner-card">
-              <img src={owner?.profilePic} alt={owner?.name} class="owner-avatar-large" />
-              <div class="owner-info">
-                <span class="owner-label">Owned by</span>
-                <a href="/profile/{owner?.id}" class="owner-name-large">{owner?.name}</a>
-                <div class="owner-stats">
-                  <span>⭐ {owner?.rating.toFixed(1)}</span>
+            <div class="lender-card">
+              <img src={lender?.profilePic} alt={lender?.name} class="lender-avatar-large" />
+              <div class="lender-info">
+                <span class="lender-label">Lent by</span>
+                <a href="/profile/{lender?.id}" class="lender-name-large">{lender?.name}</a>
+                <div class="lender-stats">
+                  <span>⭐ {lender?.rating.toFixed(1)}</span>
                   <span>•</span>
-                  <span>{owner?.totalLends} items lent</span>
+                  <span>{lender?.totalLends} items lent</span>
                 </div>
               </div>
             </div>
@@ -205,7 +205,7 @@
                       <textarea
                         id="message"
                         bind:value={requestMessage}
-                        placeholder="Let the owner know why you need this item..."
+                        placeholder="Let the lender know why you need this item..."
                         rows="3"
                       ></textarea>
                     </div>
@@ -390,7 +390,7 @@
     color: var(--text-secondary);
   }
 
-  .owner-card {
+  .lender-card {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -400,7 +400,7 @@
     margin-bottom: 2rem;
   }
 
-  .owner-avatar-large {
+  .lender-avatar-large {
     width: 4rem;
     height: 4rem;
     border-radius: 50%;
@@ -408,14 +408,14 @@
     border: 3px solid var(--primary);
   }
 
-  .owner-label {
+  .lender-label {
     font-size: 0.75rem;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .owner-name-large {
+  .lender-name-large {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--primary);
@@ -423,7 +423,7 @@
     margin: 0.25rem 0;
   }
 
-  .owner-stats {
+  .lender-stats {
     display: flex;
     gap: 0.5rem;
     font-size: 0.875rem;

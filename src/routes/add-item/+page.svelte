@@ -40,7 +40,7 @@
       name: name.trim(),
       description: description.trim(),
       categoryId,
-      ownerId: $appStore.currentUserId,
+      lenderId: $appStore.currentUserId,
       imageUrl: imageUrl.trim(),
       condition,
       permissionLevel,

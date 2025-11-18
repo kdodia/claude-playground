@@ -9,8 +9,8 @@
 
   let { item }: Props = $props();
 
-  const owner = derived(appStore, ($state) =>
-    $state.users.find((u) => u.id === item.ownerId)
+  const lender = derived(appStore, ($state) =>
+    $state.users.find((u) => u.id === item.lenderId)
   );
 </script>
 
@@ -38,12 +38,12 @@
 
     <div class="item-footer">
       <a
-        href="/profile/{$owner?.id}"
-        class="owner-info"
+        href="/profile/{$lender?.id}"
+        class="lender-info"
         onclick={(e) => e.stopPropagation()}
       >
-        <img src={$owner?.profilePic} alt={$owner?.name} class="owner-avatar" />
-        <span class="owner-name">{$owner?.name}</span>
+        <img src={$lender?.profilePic} alt={$lender?.name} class="lender-avatar" />
+        <span class="lender-name">{$lender?.name}</span>
       </a>
       <span class="borrows-count">{item.totalBorrows} borrows</span>
     </div>
@@ -112,7 +112,7 @@
     gap: 0.5rem;
   }
 
-  .owner-info {
+  .lender-info {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -124,22 +124,22 @@
     margin: -0.25rem -0.5rem;
   }
 
-  .owner-info:hover {
+  .lender-info:hover {
     background-color: rgba(16, 185, 129, 0.1);
   }
 
-  .owner-info:hover .owner-name {
+  .lender-info:hover .lender-name {
     color: var(--primary);
   }
 
-  .owner-avatar {
+  .lender-avatar {
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
     object-fit: cover;
   }
 
-  .owner-name {
+  .lender-name {
     font-size: 0.875rem;
     color: var(--text-secondary);
   }

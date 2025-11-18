@@ -25,7 +25,7 @@
   let availableItems = $derived(
     $appStore.items.filter(
       (item) =>
-        item.ownerId === $appStore.currentUserId &&
+        item.lenderId === $appStore.currentUserId &&
         !selectedTag?.itemIds.includes(item.id)
     )
   );
