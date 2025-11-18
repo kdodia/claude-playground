@@ -100,6 +100,13 @@
   function submitRequest() {
     if (!item || !startDate || !endDate) return;
 
+    // Validate that end date is after start date
+    if (new Date(endDate) <= new Date(startDate)) {
+      toast = { message: 'End date must be after start date', type: 'error' };
+      setTimeout(() => (toast = null), 3000);
+      return;
+    }
+
     const request: BorrowRequest = {
       id: `req-${Date.now()}`,
       itemId: item.id,

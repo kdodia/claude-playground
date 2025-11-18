@@ -80,12 +80,21 @@ function createAppStore() {
         const item = state.items.find((i) => i.id === request.itemId);
         const borrower = state.users.find((u) => u.id === request.borrowerId);
 
+        // Guard against missing data
+        if (!item || !borrower) {
+          console.warn('Cannot create notification: missing item or borrower');
+          return {
+            ...state,
+            borrowRequests: [...state.borrowRequests, request]
+          };
+        }
+
         const notification: Notification = {
           id: `notif-${Date.now()}`,
           userId: request.lenderId,
           type: 'borrow-request',
           title: 'New Borrow Request',
-          message: `${borrower?.name} wants to borrow your ${item?.name}`,
+          message: `${borrower.name} wants to borrow your ${item.name}`,
           read: false,
           createdAt: new Date().toISOString(),
           relatedId: request.id
@@ -110,29 +119,31 @@ function createAppStore() {
 
         let notification: Notification | null = null;
 
-        // Create appropriate notification based on status
-        if (updates.status === 'approved') {
-          notification = {
-            id: `notif-${Date.now()}`,
-            userId: request.borrowerId,
-            type: 'request-approved',
-            title: 'Request Approved!',
-            message: `${lender?.name} approved your request to borrow ${item?.name}`,
-            read: false,
-            createdAt: new Date().toISOString(),
-            relatedId: requestId
-          };
-        } else if (updates.status === 'denied') {
-          notification = {
-            id: `notif-${Date.now()}`,
-            userId: request.borrowerId,
-            type: 'request-denied',
-            title: 'Request Declined',
-            message: `${lender?.name} declined your request to borrow ${item?.name}`,
-            read: false,
-            createdAt: new Date().toISOString(),
-            relatedId: requestId
-          };
+        // Create appropriate notification based on status (only if we have required data)
+        if (item && lender) {
+          if (updates.status === 'approved') {
+            notification = {
+              id: `notif-${Date.now()}`,
+              userId: request.borrowerId,
+              type: 'request-approved',
+              title: 'Request Approved!',
+              message: `${lender.name} approved your request to borrow ${item.name}`,
+              read: false,
+              createdAt: new Date().toISOString(),
+              relatedId: requestId
+            };
+          } else if (updates.status === 'denied') {
+            notification = {
+              id: `notif-${Date.now()}`,
+              userId: request.borrowerId,
+              type: 'request-denied',
+              title: 'Request Declined',
+              message: `${lender.name} declined your request to borrow ${item.name}`,
+              read: false,
+              createdAt: new Date().toISOString(),
+              relatedId: requestId
+            };
+          }
         }
 
         return {
@@ -171,9 +182,11 @@ function createAppStore() {
           const allItemHistory = [...state.borrowHistory, history].filter(
             (h) => h.itemId === item.id && h.rating
           );
-          const avgRating =
-            allItemHistory.reduce((sum, h) => sum + (h.rating || 0), 0) /
-            allItemHistory.length;
+
+          // Guard against division by zero to prevent NaN
+          const avgRating = allItemHistory.length > 0
+            ? allItemHistory.reduce((sum, h) => sum + (h.rating || 0), 0) / allItemHistory.length
+            : 0;
 
           state.items = state.items.map((i) =>
             i.id === item.id
@@ -201,12 +214,18 @@ function createAppStore() {
         const item = state.items.find((i) => i.id === request.itemId);
         const borrower = state.users.find((u) => u.id === request.borrowerId);
 
+        // Guard against missing data
+        if (!item || !borrower) {
+          console.warn('Cannot create nudge notification: missing item or borrower');
+          return state;
+        }
+
         const notification: Notification = {
           id: `notif-${Date.now()}`,
           userId: request.lenderId,
           type: 'request-nudge',
           title: 'Friendly Reminder',
-          message: `👋 ${borrower?.name} sent you a friendly reminder about their request for ${item?.name}`,
+          message: `👋 ${borrower.name} sent you a friendly reminder about their request for ${item.name}`,
           read: false,
           createdAt: new Date().toISOString(),
           relatedId: requestId

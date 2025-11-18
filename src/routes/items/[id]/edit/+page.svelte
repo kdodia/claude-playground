@@ -86,6 +86,13 @@
       return;
     }
 
+    // Validate that end date is after start date
+    if (new Date(blockEndDate) < new Date(blockStartDate)) {
+      toast = { message: 'End date must be after start date', type: 'error' };
+      setTimeout(() => (toast = null), 3000);
+      return;
+    }
+
     blockedDates = [
       ...blockedDates,
       {
@@ -148,6 +155,10 @@
       <p>The item you're looking for doesn't exist or has been removed.</p>
       <a href="/" class="btn btn-primary">Back to Browse</a>
     </div>
+  </div>
+{:else if item.lenderId !== $appStore.currentUserId}
+  <div class="container">
+    <div class="loading">Redirecting...</div>
   </div>
 {:else}
   <div class="edit-item-page fade-in">
