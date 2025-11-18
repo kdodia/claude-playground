@@ -48,12 +48,31 @@
     item && currentUser && item.lenderId !== $appStore.currentUserId && item.available && !existingRequest
   );
 
+  // Check if nudge button should be shown (3+ days after request, not already nudged)
+  let canNudge = $derived.by(() => {
+    if (!existingRequest) return false;
+    if (existingRequest.lastNudgedAt) return false; // Already nudged
+
+    const requestDate = new Date(existingRequest.createdAt);
+    const now = new Date();
+    const daysSinceRequest = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    return daysSinceRequest >= 3;
+  });
+
   function openRequestForm() {
     showRequestForm = true;
     // Set min date to tomorrow
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     startDate = tomorrow.toISOString().split('T')[0];
+  }
+
+  function nudgeLender() {
+    if (!existingRequest) return;
+    appStore.nudgeRequest(existingRequest.id);
+    toast = { message: 'Reminder sent!', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
   }
 
   function submitRequest() {
@@ -242,6 +261,22 @@
                     <span>📅 {new Date(existingRequest.startDate).toLocaleDateString()} - {new Date(existingRequest.endDate).toLocaleDateString()}</span>
                   </div>
                   <p class="request-status-info">Waiting for {lender?.name} to respond to your request</p>
+
+                  {#if canNudge}
+                    <div class="nudge-section">
+                      <button class="btn btn-secondary btn-sm" onclick={nudgeLender}>
+                        👋 Send Friendly Reminder
+                      </button>
+                      <p class="nudge-hint">Send a gentle nudge to remind {lender?.name} about your request</p>
+                    </div>
+                  {:else if existingRequest.lastNudgedAt}
+                    <div class="nudge-sent">
+                      <span>✓ Reminder sent {new Date(existingRequest.lastNudgedAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      })}</span>
+                    </div>
+                  {/if}
                 </div>
               </div>
             {:else if canRequest}
@@ -687,6 +722,34 @@
     font-size: 0.875rem;
     color: var(--text-muted);
     text-align: center;
+  }
+
+  .nudge-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nudge-hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .nudge-sent {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(16, 185, 129, 0.1);
+    border-radius: var(--radius);
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--success);
+    font-weight: 500;
   }
 
   .calendar-section,

@@ -248,6 +248,9 @@
                         <span>•</span>
                         <span>{user.totalLends} lends</span>
                       </div>
+                      {#if currentUser && user.closeFriendIds.includes(currentUser.id)}
+                        <span class="badge badge-success">💚 Their Close Friend</span>
+                      {/if}
                     </div>
                   </a>
                   <div class="user-actions">

@@ -44,6 +44,7 @@ export interface BorrowRequest {
   status: 'pending' | 'approved' | 'denied' | 'active' | 'completed' | 'cancelled';
   message?: string;
   createdAt: string;
+  lastNudgedAt?: string; // When the borrower last sent a reminder to the lender
 }
 
 export interface BorrowHistory {
@@ -88,7 +89,7 @@ export interface Item {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted';
+  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge';
   title: string;
   message: string;
   read: boolean;

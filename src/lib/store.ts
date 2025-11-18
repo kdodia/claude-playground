@@ -192,6 +192,36 @@ function createAppStore() {
       });
     },
 
+    // Nudge lender about pending request
+    nudgeRequest: (requestId: string) => {
+      update((state) => {
+        const request = state.borrowRequests.find((r) => r.id === requestId);
+        if (!request) return state;
+
+        const item = state.items.find((i) => i.id === request.itemId);
+        const borrower = state.users.find((u) => u.id === request.borrowerId);
+
+        const notification: Notification = {
+          id: `notif-${Date.now()}`,
+          userId: request.lenderId,
+          type: 'request-nudge',
+          title: 'Friendly Reminder',
+          message: `👋 ${borrower?.name} sent you a friendly reminder about their request for ${item?.name}`,
+          read: false,
+          createdAt: new Date().toISOString(),
+          relatedId: requestId
+        };
+
+        return {
+          ...state,
+          borrowRequests: state.borrowRequests.map((r) =>
+            r.id === requestId ? { ...r, lastNudgedAt: new Date().toISOString() } : r
+          ),
+          notifications: [...state.notifications, notification]
+        };
+      });
+    },
+
     // Tag actions
     createTag: (tag: Tag) => {
       update((state) => ({
