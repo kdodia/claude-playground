@@ -2,6 +2,7 @@
   import { appStore, incomingFriendRequests } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
   import { TOAST_DURATION_MS } from '$lib/constants';
+  import type { FriendRequest } from '$lib/types';
 
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);

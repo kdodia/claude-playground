@@ -212,7 +212,7 @@
 
             {#if imageUrl}
               <div class="image-preview">
-                <img src={imageUrl} alt="Preview" onerror={(e) => e.currentTarget.style.display = 'none'} />
+                <img src={imageUrl} alt="Preview" onerror={(e) => (e.currentTarget as HTMLImageElement).style.display = 'none'} />
               </div>
             {/if}
           </div>

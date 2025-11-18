@@ -187,13 +187,13 @@
                           year: 'numeric'
                         })}
                       {:else if status === 'pending'}
-                        Requested: {new Date(activity.createdAt).toLocaleDateString('en-US', {
+                        Requested: {new Date('createdAt' in activity ? activity.createdAt : activity.endDate).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
                         })}
                       {:else if status === 'denied' || status === 'cancelled'}
-                        {new Date(activity.createdAt).toLocaleDateString('en-US', {
+                        {new Date('createdAt' in activity ? activity.createdAt : activity.endDate).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
