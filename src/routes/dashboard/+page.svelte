@@ -247,7 +247,8 @@
                     </div>
                     <div class="request-dates">
                       <span>📅</span>
-                      <span
+                      {@const isOverdue = new Date(loan.endDate) < new Date()}
+                      <span class:overdue={isOverdue}
                         >Return by: {new Date(loan.endDate).toLocaleDateString()}</span
                       >
                     </div>
@@ -277,12 +278,16 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label>How was the experience?</label>
-          <div class="star-rating">
+          <label id="rating-label">How was the experience?</label>
+          <div class="star-rating" role="radiogroup" aria-labelledby="rating-label">
             {#each [1, 2, 3, 4, 5] as star}
               <button
+                type="button"
                 class="star"
                 class:filled={star <= (hoveredStar || returnRating)}
+                role="radio"
+                aria-label="Rate {star} out of 5 stars"
+                aria-checked={star === returnRating}
                 onclick={() => (returnRating = star)}
                 onmouseenter={() => (hoveredStar = star)}
                 onmouseleave={() => (hoveredStar = 0)}
@@ -483,6 +488,11 @@
     gap: 0.5rem;
     font-size: 0.875rem;
     color: var(--text-secondary);
+  }
+
+  .request-dates .overdue {
+    color: var(--error);
+    font-weight: 600;
   }
 
   .request-message {

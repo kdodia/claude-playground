@@ -120,8 +120,8 @@
   }
 
   // Helper to check if friend request already sent
-  function getFriendRequestStatus(toUserId: string) {
-    if (!currentUser) return null;
+  function getFriendRequestStatus(toUserId: string): FriendRequest | undefined {
+    if (!currentUser) return undefined;
     return $appStore.friendRequests.find(
       (req) =>
         req.fromUserId === currentUser.id &&

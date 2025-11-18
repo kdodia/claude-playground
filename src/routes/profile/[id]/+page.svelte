@@ -47,8 +47,8 @@
   let activityTab = $state<'lending' | 'borrowing'>('borrowing');
 
   let isCurrentUser = $derived(userId === $appStore.currentUserId);
-  let isFriend = $derived(currentUser?.friendIds.includes(userId || '') || false);
-  let isCloseFriend = $derived(currentUser?.closeFriendIds.includes(userId || '') || false);
+  let isFriend = $derived(currentUser && userId ? currentUser.friendIds.includes(userId) : false);
+  let isCloseFriend = $derived(currentUser && userId ? currentUser.closeFriendIds.includes(userId) : false);
   let theyMarkedMeCloseFriend = $derived(user?.closeFriendIds.includes($appStore.currentUserId) || false);
 </script>
 

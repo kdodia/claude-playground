@@ -1,6 +1,7 @@
 <script lang="ts">
   import { appStore, currentUserNotifications } from '$lib/store';
   import { goto } from '$app/navigation';
+  import type { Notification } from '$lib/types';
 
   function markAsRead(notificationId: string) {
     appStore.markNotificationAsRead(notificationId);
@@ -10,7 +11,7 @@
     appStore.markAllNotificationsAsRead($appStore.currentUserId);
   }
 
-  function handleNotificationClick(notification: any) {
+  function handleNotificationClick(notification: Notification) {
     markAsRead(notification.id);
     if (notification.relatedId) {
       if (notification.type === 'borrow-request') {
