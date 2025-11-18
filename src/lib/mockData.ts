@@ -69,6 +69,57 @@ export const mockUsers: User[] = [
     rating: 4.6,
     totalBorrows: 19,
     totalLends: 25
+  },
+  {
+    id: 'user5',
+    name: 'Jordan Lee',
+    email: 'jordan@example.com',
+    profilePic: 'https://i.pravatar.cc/150?img=5',
+    bio: 'Coffee enthusiast and bookworm. Love kitchen gadgets!',
+    address: {
+      lat: 37.7749,
+      lng: -122.4094,
+      city: 'San Francisco'
+    },
+    friendIds: ['user2', 'user3'],
+    closeFriendIds: [],
+    rating: 4.5,
+    totalBorrows: 12,
+    totalLends: 18
+  },
+  {
+    id: 'user6',
+    name: 'Taylor Martinez',
+    email: 'taylor@example.com',
+    profilePic: 'https://i.pravatar.cc/150?img=6',
+    bio: 'New to the neighborhood! Excited to share and borrow.',
+    address: {
+      lat: 37.7649,
+      lng: -122.4194,
+      city: 'San Francisco'
+    },
+    friendIds: [],
+    closeFriendIds: [],
+    rating: 4.8,
+    totalBorrows: 5,
+    totalLends: 8
+  },
+  {
+    id: 'user7',
+    name: 'Casey Williams',
+    email: 'casey@example.com',
+    profilePic: 'https://i.pravatar.cc/150?img=7',
+    bio: 'Fitness junkie and weekend warrior. Always borrowing sports gear!',
+    address: {
+      lat: 37.7849,
+      lng: -122.4294,
+      city: 'San Francisco'
+    },
+    friendIds: ['user4'],
+    closeFriendIds: [],
+    rating: 4.7,
+    totalBorrows: 16,
+    totalLends: 11
   }
 ];
 

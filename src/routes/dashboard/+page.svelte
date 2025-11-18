@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
+  import { appStore, incomingRequests, outgoingRequests, activeLoans, incomingFriendRequests } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
 
-  let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
+  let activeTab = $state<'incoming' | 'outgoing' | 'active' | 'friend-requests'>('incoming');
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Return modal state
@@ -51,6 +51,18 @@
     returnRating = 5;
     returnReview = '';
   }
+
+  function acceptFriendRequest(requestId: string) {
+    appStore.acceptFriendRequest(requestId);
+    toast = { message: 'Friend request accepted!', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
+  }
+
+  function declineFriendRequest(requestId: string) {
+    appStore.declineFriendRequest(requestId);
+    toast = { message: 'Friend request declined', type: 'error' };
+    setTimeout(() => (toast = null), 3000);
+  }
 </script>
 
 <div class="dashboard-page fade-in">
@@ -93,6 +105,18 @@
         <span>Active Loans</span>
         {#if $activeLoans.length > 0}
           <span class="tab-badge">{$activeLoans.length}</span>
+        {/if}
+      </button>
+
+      <button
+        class="tab"
+        class:active={activeTab === 'friend-requests'}
+        onclick={() => (activeTab = 'friend-requests')}
+      >
+        <span>👥</span>
+        <span>Friend Requests</span>
+        {#if $incomingFriendRequests.length > 0}
+          <span class="tab-badge">{$incomingFriendRequests.length}</span>
         {/if}
       </button>
     </div>
@@ -255,6 +279,51 @@
             {/each}
           {/if}
         </div>
+      {:else if activeTab === 'friend-requests'}
+        <div class="requests-list">
+          {#if $incomingFriendRequests.length === 0}
+            <div class="empty-state">
+              <span class="empty-icon">👥</span>
+              <h3>No friend requests</h3>
+              <p>Friend requests from others will appear here</p>
+            </div>
+          {:else}
+            {#each $incomingFriendRequests as request}
+              {@const fromUser = $appStore.users.find((u) => u.id === request.fromUserId)}
+              <div class="request-card card">
+                <div class="request-content">
+                  <a href="/profile/{fromUser?.id}" class="request-item-link">
+                    <img src={fromUser?.profilePic} alt={fromUser?.name} class="friend-request-avatar-large" />
+                  </a>
+                  <div class="request-details">
+                    <a href="/profile/{fromUser?.id}" class="request-title-link">
+                      <h3 class="request-title">{fromUser?.name}</h3>
+                    </a>
+                    <p class="request-bio">{fromUser?.bio}</p>
+                    <div class="request-meta">
+                      <span>📍 {fromUser?.address?.city}</span>
+                      <span>•</span>
+                      <span>⭐ {fromUser?.rating.toFixed(1)}</span>
+                      <span>•</span>
+                      <span>{fromUser?.totalLends} lends</span>
+                    </div>
+                    {#if request.message}
+                      <p class="request-message">"{request.message}"</p>
+                    {/if}
+                  </div>
+                </div>
+                <div class="request-actions">
+                  <button class="btn btn-primary" onclick={() => acceptFriendRequest(request.id)}>
+                    Accept
+                  </button>
+                  <button class="btn btn-secondary" onclick={() => declineFriendRequest(request.id)}>
+                    Decline
+                  </button>
+                </div>
+              </div>
+            {/each}
+          {/if}
+        </div>
       {/if}
     </div>
   </div>
@@ -405,6 +474,23 @@
     border-radius: var(--radius);
     flex-shrink: 0;
     display: block;
+  }
+
+  .friend-request-avatar-large {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: block;
+    border: 3px solid var(--primary);
+  }
+
+  .request-bio {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
   }
 
   .request-details {
