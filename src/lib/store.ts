@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag } from './types';
+import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag, FriendRequest } from './types';
 import { initialAppState } from './mockData';
 
 const STORAGE_KEY = 'distributed-library-app-state';
@@ -229,6 +229,125 @@ function createAppStore() {
       }));
     },
 
+    // Friend request actions
+    sendFriendRequest: (fromUserId: string, toUserId: string, message?: string) => {
+      update((state) => {
+        const toUser = state.users.find((u) => u.id === toUserId);
+        const fromUser = state.users.find((u) => u.id === fromUserId);
+
+        const friendRequest: FriendRequest = {
+          id: `freq-${Date.now()}`,
+          fromUserId,
+          toUserId,
+          status: 'pending',
+          message,
+          createdAt: new Date().toISOString()
+        };
+
+        const notification: Notification = {
+          id: `notif-${Date.now()}`,
+          userId: toUserId,
+          type: 'friend-request',
+          title: 'New Friend Request',
+          message: `${fromUser?.name} sent you a friend request`,
+          read: false,
+          createdAt: new Date().toISOString(),
+          relatedId: friendRequest.id
+        };
+
+        return {
+          ...state,
+          friendRequests: [...state.friendRequests, friendRequest],
+          notifications: [...state.notifications, notification]
+        };
+      });
+    },
+
+    acceptFriendRequest: (requestId: string) => {
+      update((state) => {
+        const request = state.friendRequests.find((r) => r.id === requestId);
+        if (!request) return state;
+
+        const toUser = state.users.find((u) => u.id === request.toUserId);
+
+        // Add each user to the other's friend list
+        const updatedUsers = state.users.map((user) => {
+          if (user.id === request.fromUserId) {
+            return {
+              ...user,
+              friendIds: [...user.friendIds, request.toUserId]
+            };
+          }
+          if (user.id === request.toUserId) {
+            return {
+              ...user,
+              friendIds: [...user.friendIds, request.fromUserId]
+            };
+          }
+          return user;
+        });
+
+        const notification: Notification = {
+          id: `notif-${Date.now()}`,
+          userId: request.fromUserId,
+          type: 'friend-request-accepted',
+          title: 'Friend Request Accepted',
+          message: `${toUser?.name} accepted your friend request`,
+          read: false,
+          createdAt: new Date().toISOString(),
+          relatedId: requestId
+        };
+
+        return {
+          ...state,
+          users: updatedUsers,
+          friendRequests: state.friendRequests.map((r) =>
+            r.id === requestId ? { ...r, status: 'accepted' as const } : r
+          ),
+          notifications: [...state.notifications, notification]
+        };
+      });
+    },
+
+    declineFriendRequest: (requestId: string) => {
+      update((state) => ({
+        ...state,
+        friendRequests: state.friendRequests.map((r) =>
+          r.id === requestId ? { ...r, status: 'declined' as const } : r
+        )
+      }));
+    },
+
+    promoteToCloseFriend: (userId: string, friendId: string) => {
+      update((state) => ({
+        ...state,
+        users: state.users.map((user) =>
+          user.id === userId
+            ? {
+                ...user,
+                closeFriendIds: user.closeFriendIds.includes(friendId)
+                  ? user.closeFriendIds
+                  : [...user.closeFriendIds, friendId]
+              }
+            : user
+        )
+      }));
+    },
+
+    demoteFromCloseFriend: (userId: string, friendId: string) => {
+      update((state) => ({
+        ...state,
+        users: state.users.map((user) =>
+          user.id === userId
+            ? {
+                ...user,
+                closeFriendIds: user.closeFriendIds.filter((id) => id !== friendId)
+              }
+            : user
+        )
+      }));
+    },
+
     // Notification actions
     markNotificationAsRead: (notificationId: string) => {
       update((state) => ({
@@ -285,6 +404,16 @@ export const activeLoans = derived(appStore, ($state) =>
   $state.borrowRequests.filter(
     (req) => req.lenderId === $state.currentUserId && req.status === 'active'
   )
+);
+
+export const incomingFriendRequests = derived(appStore, ($state) =>
+  $state.friendRequests.filter(
+    (req) => req.toUserId === $state.currentUserId && req.status === 'pending'
+  )
+);
+
+export const outgoingFriendRequests = derived(appStore, ($state) =>
+  $state.friendRequests.filter((req) => req.fromUserId === $state.currentUserId)
 );
 
 // Helper function to check if a user can view an item

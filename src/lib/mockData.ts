@@ -443,5 +443,6 @@ export const initialAppState: AppState = {
   tags: mockTags,
   borrowRequests: mockBorrowRequests,
   borrowHistory: mockBorrowHistory,
+  friendRequests: [],
   notifications: []
 };

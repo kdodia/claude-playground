@@ -58,6 +58,15 @@ export interface BorrowHistory {
   review?: string;
 }
 
+export interface FriendRequest {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  status: 'pending' | 'accepted' | 'declined';
+  message?: string;
+  createdAt: string;
+}
+
 export interface Item {
   id: string;
   name: string;
@@ -78,7 +87,7 @@ export interface Item {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned';
+  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted';
   title: string;
   message: string;
   read: boolean;
@@ -94,5 +103,6 @@ export interface AppState {
   tags: Tag[];
   borrowRequests: BorrowRequest[];
   borrowHistory: BorrowHistory[];
+  friendRequests: FriendRequest[];
   notifications: Notification[];
 }

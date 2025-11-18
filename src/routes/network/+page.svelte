@@ -1,7 +1,9 @@
 <script lang="ts">
   import { appStore } from '$lib/store';
+  import Toast from '$lib/components/Toast.svelte';
 
   let currentUser = $derived($appStore.users.find((u) => u.id === $appStore.currentUserId));
+  let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Get users in each tier
   let closeFriends = $derived(
@@ -41,6 +43,27 @@
   let networkTab = $state<'close-friends' | 'friends' | 'friends-of-friends' | 'neighbors'>(
     'close-friends'
   );
+
+  function sendFriendRequest(toUserId: string) {
+    if (!currentUser) return;
+    appStore.sendFriendRequest(currentUser.id, toUserId);
+    toast = { message: 'Friend request sent!', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
+  }
+
+  function promoteToCloseFriend(friendId: string) {
+    if (!currentUser) return;
+    appStore.promoteToCloseFriend(currentUser.id, friendId);
+    toast = { message: 'Promoted to close friend!', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
+  }
+
+  function demoteFromCloseFriend(friendId: string) {
+    if (!currentUser) return;
+    appStore.demoteFromCloseFriend(currentUser.id, friendId);
+    toast = { message: 'Removed from close friends', type: 'success' };
+    setTimeout(() => (toast = null), 3000);
+  }
 </script>
 
 <div class="network-page fade-in">
@@ -167,6 +190,12 @@
                   </a>
                   <div class="user-actions">
                     <span class="badge badge-success">Close Friend</span>
+                    <button
+                      class="btn btn-sm btn-secondary"
+                      onclick={() => demoteFromCloseFriend(user.id)}
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               {/each}
@@ -196,7 +225,12 @@
                     </div>
                   </a>
                   <div class="user-actions">
-                    <button class="btn btn-sm btn-primary">Promote to Close Friend</button>
+                    <button
+                      class="btn btn-sm btn-primary"
+                      onclick={() => promoteToCloseFriend(user.id)}
+                    >
+                      Promote to Close Friend
+                    </button>
                   </div>
                 </div>
               {/each}
@@ -226,7 +260,12 @@
                     </div>
                   </a>
                   <div class="user-actions">
-                    <button class="btn btn-sm btn-primary">Send Friend Request</button>
+                    <button
+                      class="btn btn-sm btn-primary"
+                      onclick={() => sendFriendRequest(user.id)}
+                    >
+                      Send Friend Request
+                    </button>
                   </div>
                 </div>
               {/each}
@@ -256,7 +295,12 @@
                     </div>
                   </a>
                   <div class="user-actions">
-                    <button class="btn btn-sm btn-primary">Send Friend Request</button>
+                    <button
+                      class="btn btn-sm btn-primary"
+                      onclick={() => sendFriendRequest(user.id)}
+                    >
+                      Send Friend Request
+                    </button>
                   </div>
                 </div>
               {/each}
@@ -267,6 +311,10 @@
     </div>
   </div>
 </div>
+
+{#if toast}
+  <Toast message={toast.message} type={toast.type} onClose={() => (toast = null)} />
+{/if}
 
 <style>
   .page-header {
