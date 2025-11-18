@@ -81,6 +81,7 @@ export interface Item {
   rating: number;
   totalBorrows: number;
   available: boolean;
+  blockedDates?: Array<{ startDate: string; endDate: string; reason?: string }>; // dates blocked for personal use
   createdAt: string;
 }
 

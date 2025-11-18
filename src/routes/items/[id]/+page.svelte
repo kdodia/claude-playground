@@ -89,9 +89,16 @@
     });
   }
 
+  function isDateBlocked(date: string): boolean {
+    if (!item?.blockedDates) return false;
+    return item.blockedDates.some((block) => {
+      return date >= block.startDate && date <= block.endDate;
+    });
+  }
+
   // Generate next 90 days for calendar
   let calendarDates = $derived.by(() => {
-    const dates: Array<{ date: string; booked: boolean; borrow?: BorrowRequest }> = [];
+    const dates: Array<{ date: string; booked: boolean; blocked: boolean; borrow?: BorrowRequest }> = [];
     const today = new Date();
 
     for (let i = 0; i < 90; i++) {
@@ -99,10 +106,12 @@
       date.setDate(date.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       const borrow = activeBorrows.find((b) => dateStr >= b.startDate && dateStr <= b.endDate);
+      const blocked = isDateBlocked(dateStr);
 
       dates.push({
         date: dateStr,
         booked: !!borrow,
+        blocked,
         borrow
       });
     }
@@ -142,7 +151,12 @@
           </div>
 
           <div class="item-info">
-            <h1 class="item-title">{item.name}</h1>
+            <div class="item-title-row">
+              <h1 class="item-title">{item.name}</h1>
+              {#if item.lenderId === $appStore.currentUserId}
+                <a href="/items/{item.id}/edit" class="btn btn-secondary">Edit Item</a>
+              {/if}
+            </div>
 
             <div class="item-meta-row">
               <div class="rating-large">
@@ -299,6 +313,10 @@
                 <span class="legend-dot booked"></span>
                 <span>Booked</span>
               </div>
+              <div class="legend-item">
+                <span class="legend-dot blocked"></span>
+                <span>Blocked</span>
+              </div>
             </div>
             <div class="calendar-grid">
               {#each calendarDates.slice(0, 30) as dateInfo}
@@ -306,7 +324,10 @@
                 <div
                   class="calendar-day"
                   class:booked={dateInfo.booked}
-                  title={dateInfo.booked
+                  class:blocked={dateInfo.blocked}
+                  title={dateInfo.blocked
+                    ? `Blocked ${dateInfo.date}`
+                    : dateInfo.booked
                     ? `Booked ${dateInfo.date}`
                     : `Available ${dateInfo.date}`}
                 >
@@ -419,10 +440,18 @@
     margin-top: 2rem;
   }
 
+  .item-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
   .item-title {
     font-size: 2rem;
     font-weight: 700;
-    margin: 0 0 1rem 0;
+    margin: 0;
   }
 
   .item-meta-row {
@@ -699,6 +728,10 @@
     background-color: var(--error);
   }
 
+  .legend-dot.blocked {
+    background-color: #6b7280;
+  }
+
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -723,6 +756,11 @@
 
   .calendar-day.booked {
     background-color: rgba(239, 68, 68, 0.1);
+  }
+
+  .calendar-day.blocked {
+    background-color: rgba(107, 114, 128, 0.1);
+    cursor: not-allowed;
   }
 
   .day-number {
