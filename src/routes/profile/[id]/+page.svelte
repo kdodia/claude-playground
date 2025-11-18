@@ -15,15 +15,21 @@
     $appStore.borrowHistory.filter((h) => h.borrowerId === userId || h.lenderId === userId)
   );
 
-  // Get active borrows for this user
-  let activeBorrows = $derived(
+  // Get all borrow requests for this user (pending, approved, denied, active, cancelled)
+  let borrowRequests = $derived(
     $appStore.borrowRequests.filter(
-      (r) => (r.borrowerId === userId || r.lenderId === userId) && (r.status === 'active' || r.status === 'approved')
+      (r) => r.borrowerId === userId || r.lenderId === userId
     )
   );
 
-  // Combine active and completed for activity history
-  let allActivity = $derived([...activeBorrows, ...borrowHistory]);
+  // Combine requests and completed history, sorted by date (most recent first)
+  let allActivity = $derived(
+    [...borrowRequests, ...borrowHistory].sort((a, b) => {
+      const dateA = 'createdAt' in a ? new Date(a.createdAt).getTime() : new Date(a.endDate).getTime();
+      const dateB = 'createdAt' in b ? new Date(b.createdAt).getTime() : new Date(b.endDate).getTime();
+      return dateB - dateA;
+    })
+  );
 
   let isCurrentUser = $derived(userId === $appStore.currentUserId);
   let isFriend = $derived(currentUser?.friendIds.includes(userId || '') || false);
@@ -106,8 +112,9 @@
                   (u) => u.id === (activity.borrowerId === userId ? activity.lenderId : activity.borrowerId)
                 )}
                 {@const wasBorrower = activity.borrowerId === userId}
-                {@const isActive = 'status' in activity && (activity.status === 'active' || activity.status === 'approved')}
-                <div class="history-item" class:active-item={isActive}>
+                {@const status = 'status' in activity ? activity.status : 'completed'}
+                {@const isRequest = 'status' in activity}
+                <div class="history-item" class:active-item={status === 'active' || status === 'approved'}>
                   <a href="/items/{item?.id}" class="history-item-image-link">
                     <img src={item?.imageUrl} alt={item?.name} class="history-item-image" />
                   </a>
@@ -117,13 +124,33 @@
                       <a href="/items/{item?.id}" class="history-link"><strong>{item?.name}</strong></a>
                       <span>{wasBorrower ? 'from' : 'to'}</span>
                       <a href="/profile/{otherUser?.id}" class="history-link"><strong>{otherUser?.name}</strong></a>
-                      {#if isActive}
+                      {#if status === 'active'}
                         <span class="badge badge-success">Active</span>
+                      {:else if status === 'approved'}
+                        <span class="badge badge-success">Approved</span>
+                      {:else if status === 'pending'}
+                        <span class="badge badge-warning">Pending</span>
+                      {:else if status === 'denied'}
+                        <span class="badge badge-error">Denied</span>
+                      {:else if status === 'cancelled'}
+                        <span class="badge">Cancelled</span>
                       {/if}
                     </div>
                     <div class="history-date">
-                      {#if isActive}
+                      {#if status === 'active' || status === 'approved'}
                         Return by: {new Date(activity.endDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      {:else if status === 'pending'}
+                        Requested: {new Date(activity.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      {:else if status === 'denied' || status === 'cancelled'}
+                        {new Date(activity.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric'
