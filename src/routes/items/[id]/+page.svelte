@@ -60,6 +60,28 @@
     return daysSinceRequest >= 3;
   });
 
+  // Calculate days remaining until nudge is available
+  let daysUntilNudge = $derived.by(() => {
+    if (!existingRequest || existingRequest.lastNudgedAt || canNudge) return null;
+
+    const requestDate = new Date(existingRequest.createdAt);
+    const now = new Date();
+    const daysSinceRequest = Math.floor((now.getTime() - requestDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    return 3 - daysSinceRequest;
+  });
+
+  // Calculate the date when nudge becomes available
+  let nudgeAvailableDate = $derived.by(() => {
+    if (!existingRequest || existingRequest.lastNudgedAt || canNudge) return null;
+
+    const requestDate = new Date(existingRequest.createdAt);
+    const availableDate = new Date(requestDate);
+    availableDate.setDate(availableDate.getDate() + 3);
+
+    return availableDate;
+  });
+
   function openRequestForm() {
     showRequestForm = true;
     // Set min date to tomorrow
@@ -275,6 +297,20 @@
                         month: 'short',
                         day: 'numeric'
                       })}</span>
+                    </div>
+                  {:else if daysUntilNudge !== null && nudgeAvailableDate}
+                    <div class="nudge-waiting">
+                      <span class="nudge-waiting-icon">⏳</span>
+                      <p class="nudge-waiting-text">
+                        {#if daysUntilNudge === 1}
+                          Friendly reminder available tomorrow
+                        {:else}
+                          Friendly reminder available in {daysUntilNudge} days ({nudgeAvailableDate.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })})
+                        {/if}
+                      </p>
                     </div>
                   {/if}
                 </div>
@@ -750,6 +786,29 @@
     font-size: 0.875rem;
     color: var(--success);
     font-weight: 500;
+  }
+
+  .nudge-waiting {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .nudge-waiting-icon {
+    font-size: 1.25rem;
+  }
+
+  .nudge-waiting-text {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    line-height: 1.4;
   }
 
   .calendar-section,
