@@ -1,0 +1,50 @@
+{
+	"name": "Library of Things",
+	"short_name": "LibOfThings",
+	"description": "Share and borrow items with friends, neighbors, and your community",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#10b981",
+	"orientation": "portrait-primary",
+	"scope": "/",
+	"icons": [
+		{
+			"src": "/icons/icon.svg",
+			"sizes": "any",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon.svg",
+			"sizes": "512x512",
+			"type": "image/svg+xml",
+			"purpose": "maskable"
+		}
+	],
+	"categories": ["social", "lifestyle", "utilities"],
+	"screenshots": [],
+	"shortcuts": [
+		{
+			"name": "Browse Items",
+			"short_name": "Browse",
+			"description": "Browse available items to borrow",
+			"url": "/",
+			"icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+		},
+		{
+			"name": "My Items",
+			"short_name": "My Items",
+			"description": "View and manage your items",
+			"url": "/my-items",
+			"icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+		},
+		{
+			"name": "Dashboard",
+			"short_name": "Dashboard",
+			"description": "Manage borrow requests",
+			"url": "/dashboard",
+			"icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+		}
+	]
+}

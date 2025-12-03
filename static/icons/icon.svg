@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)"/>
+  <!-- Book/Library icon -->
+  <g fill="white">
+    <!-- Left book -->
+    <path d="M140 160 L140 352 L200 352 L200 180 L180 160 Z" opacity="0.9"/>
+    <!-- Middle book -->
+    <path d="M210 140 L210 352 L280 352 L280 140 Z"/>
+    <!-- Right book -->
+    <path d="M290 160 L290 352 L350 352 L350 180 L330 160 Z" opacity="0.9"/>
+    <!-- Sharing arrows -->
+    <path d="M370 240 L410 280 L370 320 L370 290 L320 290 L320 270 L370 270 Z" opacity="0.8"/>
+    <path d="M142 240 L102 280 L142 320 L142 290 L192 290 L192 270 L142 270 Z" opacity="0.8"/>
+  </g>
+  <!-- Heart (sharing/community) -->
+  <path d="M256 380 C220 350 180 310 180 280 C180 250 200 230 230 230 C250 230 256 250 256 250 C256 250 262 230 282 230 C312 230 332 250 332 280 C332 310 292 350 256 380 Z" fill="#fff" opacity="0.9"/>
+</svg>
