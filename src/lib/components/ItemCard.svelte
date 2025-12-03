@@ -2,6 +2,7 @@
   import type { Item, User } from '$lib/types';
   import { appStore, getPermissionLevelInfo } from '$lib/store';
   import { derived } from 'svelte/store';
+  import FallbackImage from './FallbackImage.svelte';
 
   interface Props {
     item: Item;
@@ -18,7 +19,7 @@
 
 <a href="/items/{item.id}" class="item-card card">
   <div class="item-image">
-    <img src={item.imageUrl} alt={item.name} />
+    <FallbackImage src={item.imageUrl} alt={item.name} fallbackType="item" />
     <div class="permission-badge" style="background-color: {permissionInfo.color};">
       <span>{permissionInfo.icon}</span>
       <span>{permissionInfo.label}</span>
@@ -51,7 +52,9 @@
           window.location.href = `/profile/${$lender?.id}`;
         }}
       >
-        <img src={$lender?.profilePic} alt={$lender?.name} class="lender-avatar" />
+        <span class="lender-avatar">
+          <FallbackImage src={$lender?.profilePic} alt={$lender?.name || 'User'} fallbackType="avatar" />
+        </span>
         <span class="lender-name">{$lender?.name}</span>
       </button>
       <span class="borrows-count">{item.totalBorrows} borrows</span>
@@ -76,14 +79,11 @@
     background-color: var(--surface);
   }
 
-  .item-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .item-image :global(.fallback-image) {
     transition: transform var(--transition);
   }
 
-  .item-card:hover .item-image img {
+  .item-card:hover .item-image :global(.fallback-image) {
     transform: scale(1.05);
   }
 
@@ -158,10 +158,12 @@
   }
 
   .lender-avatar {
+    display: block;
     width: 1.5rem;
     height: 1.5rem;
     border-radius: 50%;
-    object-fit: cover;
+    overflow: hidden;
+    flex-shrink: 0;
   }
 
   .lender-name {
