@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag, FriendRequest } from './types';
+import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag, FriendRequest, ItemCondition } from './types';
 import { initialAppState } from './mockData';
 
 const STORAGE_KEY = 'distributed-library-app-state';
@@ -182,10 +182,13 @@ function createAppStore() {
     },
 
     // Complete a borrow and move to history
-    completeBorrow: (requestId: string, rating: number, review: string) => {
+    completeBorrow: (requestId: string, rating: number, review: string, newCondition?: ItemCondition) => {
       update((state) => {
         const request = state.borrowRequests.find((r) => r.id === requestId);
         if (!request) return state;
+
+        const item = state.items.find((i) => i.id === request.itemId);
+        const conditionBefore = item?.condition;
 
         const history: BorrowHistory = {
           id: `hist-${Date.now()}`,
@@ -196,11 +199,12 @@ function createAppStore() {
           endDate: request.endDate,
           actualReturnDate: new Date().toISOString().split('T')[0],
           rating,
-          review
+          review,
+          conditionBefore,
+          conditionAfter: newCondition || conditionBefore
         };
 
-        // Update item rating
-        const item = state.items.find((i) => i.id === request.itemId);
+        // Update item rating and condition
         if (item) {
           const allItemHistory = [...state.borrowHistory, history].filter(
             (h) => h.itemId === item.id && h.rating
@@ -213,7 +217,12 @@ function createAppStore() {
 
           state.items = state.items.map((i) =>
             i.id === item.id
-              ? { ...i, rating: Math.round(avgRating * 10) / 10, available: true }
+              ? {
+                  ...i,
+                  rating: Math.round(avgRating * 10) / 10,
+                  available: true,
+                  condition: newCondition || i.condition
+                }
               : i
           );
         }

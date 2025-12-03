@@ -47,6 +47,8 @@ export interface BorrowRequest {
   lastNudgedAt?: string; // When the borrower last sent a reminder to the lender
 }
 
+export type ItemCondition = 'excellent' | 'good' | 'fair' | 'poor';
+
 export interface BorrowHistory {
   id: string;
   itemId: string;
@@ -57,6 +59,8 @@ export interface BorrowHistory {
   actualReturnDate?: string;
   rating?: number;
   review?: string;
+  conditionBefore?: ItemCondition;
+  conditionAfter?: ItemCondition;
 }
 
 export interface FriendRequest {
@@ -75,7 +79,7 @@ export interface Item {
   categoryId: string;
   lenderId: string;
   imageUrl: string;
-  condition: 'excellent' | 'good' | 'fair' | 'poor';
+  condition: ItemCondition;
   permissionLevel: PermissionLevel;
   allowedUserIds?: string[]; // for 'specific-users' permission level
   tagIds: string[];
