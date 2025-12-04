@@ -3,8 +3,9 @@
   import { appStore, getCategoryPath, getPermissionLevelInfo } from '$lib/store';
   import { goto } from '$app/navigation';
   import Toast from '$lib/components/Toast.svelte';
+  import DateRangeCalendar from '$lib/components/DateRangeCalendar.svelte';
   import type { BorrowRequest } from '$lib/types';
-  import { NUDGE_DELAY_DAYS, CALENDAR_PREVIEW_DAYS, TOAST_DURATION_MS } from '$lib/constants';
+  import { NUDGE_DELAY_DAYS, TOAST_DURATION_MS } from '$lib/constants';
 
   let itemId = $derived($page.params.id);
   let item = $derived($appStore.items.find((i) => i.id === itemId));
@@ -134,41 +135,30 @@
     }, 3000);
   }
 
-  function isDateBooked(date: string): boolean {
-    return activeBorrows.some((borrow) => {
-      return date >= borrow.startDate && date <= borrow.endDate;
-    });
-  }
+  // Booked date ranges for calendar
+  let bookedDateRanges = $derived(
+    activeBorrows.map((b) => ({ startDate: b.startDate, endDate: b.endDate }))
+  );
 
-  function isDateBlocked(date: string): boolean {
-    if (!item?.blockedDates) return false;
-    return item.blockedDates.some((block) => {
-      return date >= block.startDate && date <= block.endDate;
-    });
-  }
+  // Blocked date ranges for calendar
+  let blockedDateRanges = $derived(item?.blockedDates || []);
 
-  // Generate next CALENDAR_PREVIEW_DAYS for calendar
-  let calendarDates = $derived.by(() => {
-    const dates: Array<{ date: string; booked: boolean; blocked: boolean; borrow?: BorrowRequest }> = [];
-    const today = new Date();
-
-    for (let i = 0; i < CALENDAR_PREVIEW_DAYS; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      const borrow = activeBorrows.find((b) => dateStr >= b.startDate && dateStr <= b.endDate);
-      const blocked = isDateBlocked(dateStr);
-
-      dates.push({
-        date: dateStr,
-        booked: !!borrow,
-        blocked,
-        borrow
-      });
-    }
-
-    return dates;
+  // Min date for calendar (tomorrow)
+  let minCalendarDate = $derived.by(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
   });
+
+  // Handle date selection from calendar
+  function handleDateSelect(start: string, end: string | null) {
+    startDate = start;
+    endDate = end || '';
+    if (start && !showRequestForm) {
+      showRequestForm = true;
+    }
+  }
 </script>
 
 {#if !item}
@@ -331,29 +321,48 @@
                   <button class="btn btn-primary btn-lg" onclick={openRequestForm}>
                     Request to Borrow
                   </button>
+                  <p class="action-hint">Or select dates from the calendar on the right</p>
                 {:else}
                   <div class="request-form">
                     <h3>Request to Borrow</h3>
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="start-date">Start Date</label>
-                        <input
-                          type="date"
-                          id="start-date"
-                          bind:value={startDate}
-                          min={new Date().toISOString().split('T')[0]}
-                        />
+
+                    {#if startDate && endDate}
+                      <div class="selected-dates-display">
+                        <div class="date-badge">
+                          <span class="date-label">From</span>
+                          <span class="date-value">
+                            {new Date(startDate + 'T00:00:00').toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
+                        <span class="date-arrow" aria-hidden="true">→</span>
+                        <div class="date-badge">
+                          <span class="date-label">To</span>
+                          <span class="date-value">
+                            {new Date(endDate + 'T00:00:00').toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        </div>
                       </div>
-                      <div class="form-group">
-                        <label for="end-date">End Date</label>
-                        <input
-                          type="date"
-                          id="end-date"
-                          bind:value={endDate}
-                          min={startDate}
-                        />
+                      <p class="dates-change-hint">Use the calendar to change dates</p>
+                    {:else if startDate}
+                      <div class="dates-incomplete">
+                        <span class="incomplete-icon" aria-hidden="true">📅</span>
+                        <p>Select an end date from the calendar to complete your booking</p>
                       </div>
-                    </div>
+                    {:else}
+                      <div class="dates-incomplete">
+                        <span class="incomplete-icon" aria-hidden="true">📅</span>
+                        <p>Select your dates from the calendar to continue</p>
+                      </div>
+                    {/if}
+
                     <div class="form-group">
                       <label for="message">Message (optional)</label>
                       <textarea
@@ -371,7 +380,7 @@
                       >
                         Send Request
                       </button>
-                      <button class="btn btn-secondary" onclick={() => (showRequestForm = false)}>
+                      <button class="btn btn-secondary" onclick={() => { showRequestForm = false; startDate = ''; endDate = ''; }}>
                         Cancel
                       </button>
                     </div>
@@ -384,43 +393,16 @@
 
         <div class="item-sidebar">
           <div class="calendar-section card">
-            <h3>Availability Calendar</h3>
-            <div class="calendar-legend">
-              <div class="legend-item">
-                <span class="legend-dot available"></span>
-                <span>Available</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-dot booked"></span>
-                <span>Booked</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-dot blocked"></span>
-                <span>Blocked</span>
-              </div>
-            </div>
-            <div class="calendar-grid">
-              {#each calendarDates.slice(0, 30) as dateInfo}
-                {@const date = new Date(dateInfo.date)}
-                <button
-                  type="button"
-                  class="calendar-day"
-                  class:booked={dateInfo.booked}
-                  class:blocked={dateInfo.blocked}
-                  aria-label={dateInfo.blocked
-                    ? `Blocked ${dateInfo.date}`
-                    : dateInfo.booked
-                    ? `Booked ${dateInfo.date}`
-                    : `Available ${dateInfo.date}`}
-                  disabled={dateInfo.booked || dateInfo.blocked}
-                >
-                  <div class="day-number">{date.getDate()}</div>
-                  <div class="day-label" aria-hidden="true">
-                    {date.toLocaleDateString('en-US', { month: 'short' })}
-                  </div>
-                </button>
-              {/each}
-            </div>
+            <h3>Availability & Booking</h3>
+            <p class="calendar-hint">Select dates to request this item</p>
+            <DateRangeCalendar
+              bookedDates={bookedDateRanges}
+              blockedDates={blockedDateRanges}
+              {startDate}
+              {endDate}
+              onDateSelect={handleDateSelect}
+              minDate={minCalendarDate}
+            />
           </div>
 
           {#if history.length > 0}
@@ -685,12 +667,6 @@
     font-size: 1.25rem;
   }
 
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-
   .form-group {
     margin-bottom: 1rem;
   }
@@ -703,7 +679,6 @@
     color: var(--text-secondary);
   }
 
-  .form-group input,
   .form-group textarea {
     width: 100%;
   }
@@ -830,89 +805,87 @@
 
   .calendar-section h3,
   .reviews-section h3 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 0.5rem 0;
     font-size: 1.125rem;
     font-weight: 600;
   }
 
-  .calendar-legend {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
+  .calendar-hint {
     font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0 0 1rem 0;
   }
 
-  .legend-item {
+  .action-hint {
+    margin: 0.75rem 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  .selected-dates-display {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: rgba(16, 185, 129, 0.1);
+    border-radius: var(--radius);
+    margin-bottom: 0.5rem;
   }
 
-  .legend-dot {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-  }
-
-  .legend-dot.available {
-    background-color: var(--success);
-  }
-
-  .legend-dot.booked {
-    background-color: var(--error);
-  }
-
-  .legend-dot.blocked {
-    background-color: #6b7280;
-  }
-
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
-  }
-
-  .calendar-day {
-    aspect-ratio: 1;
+  .date-badge {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    border-radius: var(--radius);
-    background-color: rgba(16, 185, 129, 0.1);
-    cursor: pointer;
-    transition: all var(--transition);
-    border: 1px solid transparent;
+    gap: 0.25rem;
   }
 
-  .calendar-day:hover:not(:disabled) {
-    transform: scale(1.05);
-  }
-
-  .calendar-day.booked,
-  .calendar-day:disabled.booked {
-    background-color: rgba(239, 68, 68, 0.1);
-    cursor: not-allowed;
-  }
-
-  .calendar-day.blocked,
-  .calendar-day:disabled.blocked {
-    background-color: rgba(107, 114, 128, 0.1);
-    cursor: not-allowed;
-  }
-
-  .calendar-day:disabled {
-    opacity: 0.7;
-  }
-
-  .day-number {
-    font-weight: 600;
-    font-size: 0.875rem;
-  }
-
-  .day-label {
+  .date-label {
     font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--text-muted);
+  }
+
+  .date-value {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .date-arrow {
+    font-size: 1.25rem;
+    color: var(--primary);
+  }
+
+  .dates-change-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0 0 1rem 0;
+  }
+
+  .dates-incomplete {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background-color: var(--background);
+    border-radius: var(--radius);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .incomplete-icon {
+    font-size: 2rem;
+  }
+
+  .dates-incomplete p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
   }
 
   .reviews-list {
@@ -971,17 +944,13 @@
       grid-template-columns: 1fr;
     }
 
-    .form-row {
-      grid-template-columns: 1fr;
+    .selected-dates-display {
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    .calendar-grid {
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.25rem;
-    }
-
-    .day-label {
-      display: none;
+    .date-arrow {
+      transform: rotate(90deg);
     }
   }
 </style>
