@@ -40,7 +40,8 @@ function createTestState(): AppState {
 		borrowRequests: [],
 		borrowHistory: [],
 		friendRequests: [],
-		notifications: []
+		notifications: [],
+		wishlist: []
 	};
 }
 

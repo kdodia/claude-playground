@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag, FriendRequest, ItemCondition } from './types';
+import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag, FriendRequest, ItemCondition, WishlistItem } from './types';
 import { initialAppState } from './mockData';
 
 const STORAGE_KEY = 'distributed-library-app-state';
@@ -205,6 +205,7 @@ function createAppStore() {
         };
 
         // Update item rating and condition
+        let updatedItems = state.items;
         if (item) {
           const allItemHistory = [...state.borrowHistory, history].filter(
             (h) => h.itemId === item.id && h.rating
@@ -215,7 +216,7 @@ function createAppStore() {
             ? allItemHistory.reduce((sum, h) => sum + (h.rating || 0), 0) / allItemHistory.length
             : 0;
 
-          state.items = state.items.map((i) =>
+          updatedItems = state.items.map((i) =>
             i.id === item.id
               ? {
                   ...i,
@@ -227,12 +228,34 @@ function createAppStore() {
           );
         }
 
+        // Create availability notifications for wishlist subscribers
+        const wishlistNotifications: Notification[] = [];
+        if (item) {
+          const subscribers = state.wishlist.filter(
+            (w) => w.itemId === item.id && w.notifyOnAvailable && w.userId !== request.borrowerId
+          );
+
+          for (const sub of subscribers) {
+            wishlistNotifications.push(
+              createNotification(
+                sub.userId,
+                'wishlist-available',
+                'Item Now Available!',
+                `${item.name} is now available to borrow`,
+                item.id
+              )
+            );
+          }
+        }
+
         return {
           ...state,
+          items: updatedItems,
           borrowRequests: state.borrowRequests.map((r) =>
             r.id === requestId ? { ...r, status: 'completed' as const } : r
           ),
-          borrowHistory: [...state.borrowHistory, history]
+          borrowHistory: [...state.borrowHistory, history],
+          notifications: [...state.notifications, ...wishlistNotifications]
         };
       });
     },
@@ -426,6 +449,50 @@ function createAppStore() {
       }));
     },
 
+    // Wishlist actions
+    addToWishlist: (itemId: string, notifyOnAvailable: boolean = true) => {
+      update((state) => {
+        // Check if already in wishlist
+        const existing = state.wishlist.find(
+          (w) => w.userId === state.currentUserId && w.itemId === itemId
+        );
+        if (existing) return state;
+
+        const wishlistItem: WishlistItem = {
+          id: `wish-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          userId: state.currentUserId,
+          itemId,
+          notifyOnAvailable,
+          addedAt: new Date().toISOString()
+        };
+
+        return {
+          ...state,
+          wishlist: [...state.wishlist, wishlistItem]
+        };
+      });
+    },
+
+    removeFromWishlist: (itemId: string) => {
+      update((state) => ({
+        ...state,
+        wishlist: state.wishlist.filter(
+          (w) => !(w.userId === state.currentUserId && w.itemId === itemId)
+        )
+      }));
+    },
+
+    toggleWishlistNotification: (itemId: string) => {
+      update((state) => ({
+        ...state,
+        wishlist: state.wishlist.map((w) =>
+          w.userId === state.currentUserId && w.itemId === itemId
+            ? { ...w, notifyOnAvailable: !w.notifyOnAvailable }
+            : w
+        )
+      }));
+    },
+
     // Notification actions
     markNotificationAsRead: (notificationId: string) => {
       update((state) => ({
@@ -493,6 +560,25 @@ export const incomingFriendRequests = derived(appStore, ($state) =>
 export const outgoingFriendRequests = derived(appStore, ($state) =>
   $state.friendRequests.filter((req) => req.fromUserId === $state.currentUserId)
 );
+
+// Derived store for current user's wishlist
+export const currentUserWishlist = derived(appStore, ($state) =>
+  $state.wishlist
+    .filter((w) => w.userId === $state.currentUserId)
+    .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
+);
+
+// Derived store for wishlist items with full item details
+export const currentUserWishlistItems = derived(appStore, ($state) => {
+  const wishlistEntries = $state.wishlist.filter((w) => w.userId === $state.currentUserId);
+  return wishlistEntries
+    .map((entry) => {
+      const item = $state.items.find((i) => i.id === entry.itemId);
+      return item ? { ...entry, item } : null;
+    })
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+    .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime());
+});
 
 // Derived store for items the current user can view
 export const visibleItems = derived(appStore, ($state) =>

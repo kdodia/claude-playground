@@ -14,6 +14,15 @@
   let categoryPath = $derived(item ? getCategoryPath(item.categoryId, $appStore) : []);
   let permissionInfo = $derived(item ? getPermissionLevelInfo(item.permissionLevel) : null);
 
+  // Wishlist state
+  let wishlistEntry = $derived(
+    $appStore.wishlist.find(
+      (w) => w.userId === $appStore.currentUserId && w.itemId === itemId
+    )
+  );
+  let isInWishlist = $derived(!!wishlistEntry);
+  let notifyOnAvailable = $derived(wishlistEntry?.notifyOnAvailable ?? true);
+
   // Get borrowing history for this item
   let history = $derived(
     $appStore.borrowHistory
@@ -159,6 +168,29 @@
       showRequestForm = true;
     }
   }
+
+  // Wishlist functions
+  function toggleWishlist() {
+    if (!itemId) return;
+    if (isInWishlist) {
+      appStore.removeFromWishlist(itemId);
+      toast = { message: 'Removed from wishlist', type: 'success' };
+    } else {
+      appStore.addToWishlist(itemId, true);
+      toast = { message: 'Added to wishlist! You\'ll be notified when available.', type: 'success' };
+    }
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
+  }
+
+  function toggleNotification() {
+    if (!itemId) return;
+    appStore.toggleWishlistNotification(itemId);
+    toast = {
+      message: notifyOnAvailable ? 'Notifications disabled' : 'Notifications enabled',
+      type: 'success'
+    };
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
+  }
 </script>
 
 {#if !item}
@@ -194,9 +226,23 @@
           <div class="item-info">
             <div class="item-title-row">
               <h1 class="item-title">{item.name}</h1>
-              {#if item.lenderId === $appStore.currentUserId}
-                <a href="/items/{item.id}/edit" class="btn btn-secondary">Edit Item</a>
-              {/if}
+              <div class="title-actions">
+                {#if item.lenderId !== $appStore.currentUserId}
+                  <button
+                    class="wishlist-btn"
+                    class:active={isInWishlist}
+                    onclick={toggleWishlist}
+                    aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-pressed={isInWishlist}
+                  >
+                    <span class="wishlist-icon" aria-hidden="true">{isInWishlist ? '❤️' : '🤍'}</span>
+                    <span class="wishlist-text">{isInWishlist ? 'Saved' : 'Save'}</span>
+                  </button>
+                {/if}
+                {#if item.lenderId === $appStore.currentUserId}
+                  <a href="/items/{item.id}/edit" class="btn btn-secondary">Edit Item</a>
+                {/if}
+              </div>
             </div>
 
             <div class="item-meta-row">
@@ -256,6 +302,30 @@
                   {#each $appStore.tags.filter((t) => item.tagIds.includes(t.id)) as tag}
                     <span class="badge badge-primary"><span aria-hidden="true">🏷️</span> {tag.name}</span>
                   {/each}
+                </div>
+              </div>
+            {/if}
+
+            {#if isInWishlist && !item.available && item.lenderId !== $appStore.currentUserId}
+              <div class="wishlist-status-card">
+                <div class="wishlist-status-header">
+                  <span class="wishlist-status-icon" aria-hidden="true">❤️</span>
+                  <div>
+                    <h4>On Your Wishlist</h4>
+                    <p class="wishlist-status-info">This item is currently borrowed by someone else</p>
+                  </div>
+                </div>
+                <div class="notification-toggle">
+                  <label class="toggle-label">
+                    <input
+                      type="checkbox"
+                      checked={notifyOnAvailable}
+                      onchange={toggleNotification}
+                      class="toggle-checkbox"
+                    />
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-text">Notify me when available</span>
+                  </label>
                 </div>
               </div>
             {/if}
@@ -517,6 +587,134 @@
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
+  }
+
+  .title-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .wishlist-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    transition: all var(--transition);
+  }
+
+  .wishlist-btn:hover {
+    background-color: var(--surface-hover);
+    border-color: var(--text-muted);
+  }
+
+  .wishlist-btn.active {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .wishlist-icon {
+    font-size: 1.125rem;
+  }
+
+  .wishlist-status-card {
+    background-color: rgba(239, 68, 68, 0.05);
+    border: 2px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .wishlist-status-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .wishlist-status-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+  }
+
+  .wishlist-status-card h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .wishlist-status-info {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .notification-toggle {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(239, 68, 68, 0.15);
+  }
+
+  .toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 2.5rem;
+    height: 1.375rem;
+    background-color: var(--border);
+    border-radius: 999px;
+    transition: background-color var(--transition);
+    flex-shrink: 0;
+  }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform var(--transition);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .toggle-checkbox:checked + .toggle-switch {
+    background-color: var(--primary);
+  }
+
+  .toggle-checkbox:checked + .toggle-switch::after {
+    transform: translateX(1.125rem);
+  }
+
+  .toggle-checkbox:focus-visible + .toggle-switch {
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+  }
+
+  .toggle-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
   }
 
   .item-meta-row {

@@ -90,10 +90,18 @@ export interface Item {
   createdAt: string;
 }
 
+export interface WishlistItem {
+  id: string;
+  userId: string;
+  itemId: string;
+  notifyOnAvailable: boolean;
+  addedAt: string;
+}
+
 export interface Notification {
   id: string;
   userId: string;
-  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge';
+  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge' | 'wishlist-available';
   title: string;
   message: string;
   read: boolean;
@@ -111,4 +119,5 @@ export interface AppState {
   borrowHistory: BorrowHistory[];
   friendRequests: FriendRequest[];
   notifications: Notification[];
+  wishlist: WishlistItem[];
 }

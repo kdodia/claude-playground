@@ -70,6 +70,7 @@ function createTestState(overrides: Partial<AppState> = {}): AppState {
 		borrowHistory: [],
 		friendRequests: [],
 		notifications: [],
+		wishlist: [],
 		...overrides
 	};
 }
