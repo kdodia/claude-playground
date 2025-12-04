@@ -2,7 +2,7 @@
   import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
   import { MAX_RATING, MIN_RATING, DEFAULT_RATING } from '$lib/constants';
-  import { useToast } from '$lib/useToast';
+  import { useToast } from '$lib/useToast.svelte';
   import type { ItemCondition } from '$lib/types';
 
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
