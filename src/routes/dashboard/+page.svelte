@@ -2,7 +2,8 @@
   import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
   import { MAX_RATING, MIN_RATING, DEFAULT_RATING } from '$lib/constants';
-  import { useToast } from '$lib/useToast';
+  import { useToast } from '$lib/useToast.svelte';
+  import type { ItemCondition } from '$lib/types';
 
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
   const { toast, showToast, clearToast } = useToast();
@@ -14,6 +15,23 @@
   let returnReview = $state('');
   let hoveredStar = $state(0);
   let returnModalElement = $state<HTMLDivElement | undefined>();
+  let conditionChanged = $state(false);
+  let newCondition = $state<ItemCondition>('good');
+
+  // Get the current item for the selected loan
+  let selectedLoanItem = $derived.by(() => {
+    if (!selectedLoanId) return null;
+    const loan = $activeLoans.find(l => l.id === selectedLoanId);
+    if (!loan) return null;
+    return $appStore.items.find(i => i.id === loan.itemId);
+  });
+
+  const conditionLabels: Record<ItemCondition, { label: string; description: string }> = {
+    excellent: { label: 'Excellent', description: 'Like new, no visible wear' },
+    good: { label: 'Good', description: 'Minor wear, fully functional' },
+    fair: { label: 'Fair', description: 'Noticeable wear, works well' },
+    poor: { label: 'Poor', description: 'Significant wear, still usable' }
+  };
 
   function approveRequest(requestId: string) {
     appStore.updateBorrowRequest(requestId, { status: 'approved' });
@@ -29,6 +47,15 @@
     selectedLoanId = requestId;
     returnRating = DEFAULT_RATING;
     returnReview = '';
+    conditionChanged = false;
+    // Initialize newCondition to current item condition
+    const loan = $activeLoans.find(l => l.id === requestId);
+    if (loan) {
+      const item = $appStore.items.find(i => i.id === loan.itemId);
+      if (item) {
+        newCondition = item.condition;
+      }
+    }
     showReturnModal = true;
   }
 
@@ -41,14 +68,21 @@
       return;
     }
 
-    appStore.completeBorrow(selectedLoanId, returnRating, returnReview);
-    showToast('Item marked as returned!', 'success');
+    // Pass condition only if it was changed
+    const conditionToUpdate = conditionChanged ? newCondition : undefined;
+    appStore.completeBorrow(selectedLoanId, returnRating, returnReview, conditionToUpdate);
+
+    const message = conditionChanged
+      ? `Item marked as returned! Condition updated to ${conditionLabels[newCondition].label}.`
+      : 'Item marked as returned!';
+    showToast(message, 'success');
 
     // Reset modal state
     showReturnModal = false;
     selectedLoanId = null;
     returnRating = DEFAULT_RATING;
     returnReview = '';
+    conditionChanged = false;
   }
 
   function cancelReturn() {
@@ -56,6 +90,7 @@
     selectedLoanId = null;
     returnRating = DEFAULT_RATING;
     returnReview = '';
+    conditionChanged = false;
   }
 
   // Handle escape key for modal
@@ -332,6 +367,62 @@
             placeholder="Share your experience with this item..."
             rows="4"
           ></textarea>
+        </div>
+
+        <!-- Condition tracking section -->
+        <div class="form-group condition-section">
+          <div class="condition-header">
+            <span class="condition-title">Item Condition</span>
+            {#if selectedLoanItem}
+              <span class="current-condition">
+                Current: <strong>{conditionLabels[selectedLoanItem.condition].label}</strong>
+              </span>
+            {/if}
+          </div>
+
+          <div class="condition-toggle">
+            <label class="toggle-label">
+              <input
+                type="checkbox"
+                bind:checked={conditionChanged}
+                class="toggle-checkbox"
+              />
+              <span class="toggle-text">Condition has changed</span>
+            </label>
+          </div>
+
+          {#if conditionChanged}
+            <div class="condition-options" role="radiogroup" aria-label="Select new condition">
+              {#each (['excellent', 'good', 'fair', 'poor'] as const) as condition}
+                <label
+                  class="condition-option"
+                  class:selected={newCondition === condition}
+                  class:downgrade={selectedLoanItem && condition !== selectedLoanItem.condition &&
+                    ['excellent', 'good', 'fair', 'poor'].indexOf(condition) >
+                    ['excellent', 'good', 'fair', 'poor'].indexOf(selectedLoanItem.condition)}
+                >
+                  <input
+                    type="radio"
+                    name="condition"
+                    value={condition}
+                    bind:group={newCondition}
+                    class="sr-only"
+                  />
+                  <span class="condition-label">{conditionLabels[condition].label}</span>
+                  <span class="condition-description">{conditionLabels[condition].description}</span>
+                </label>
+              {/each}
+            </div>
+            {#if selectedLoanItem && newCondition !== selectedLoanItem.condition}
+              <p class="condition-note">
+                {#if ['excellent', 'good', 'fair', 'poor'].indexOf(newCondition) > ['excellent', 'good', 'fair', 'poor'].indexOf(selectedLoanItem.condition)}
+                  <span class="note-warning">⚠️ This will downgrade the item's condition from {conditionLabels[selectedLoanItem.condition].label} to {conditionLabels[newCondition].label}</span>
+                {:else}
+                  <span class="note-upgrade">✨ This will upgrade the item's condition to {conditionLabels[newCondition].label}</span>
+                {/if}
+              </p>
+            {/if}
+          {/if}
         </div>
       </div>
 
@@ -713,5 +804,124 @@
     .tab span:nth-child(2) {
       display: none;
     }
+  }
+
+  /* Condition tracking styles */
+  .condition-section {
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .condition-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .condition-title {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+  }
+
+  .current-condition {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .condition-toggle {
+    margin-bottom: 1rem;
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: normal;
+  }
+
+  .toggle-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--primary);
+    cursor: pointer;
+  }
+
+  .toggle-text {
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+  }
+
+  .condition-options {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .condition-option {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-weight: normal;
+    margin-bottom: 0;
+  }
+
+  .condition-option:hover {
+    border-color: var(--primary);
+    background-color: rgba(16, 185, 129, 0.05);
+  }
+
+  .condition-option.selected {
+    border-color: var(--primary);
+    background-color: rgba(16, 185, 129, 0.1);
+  }
+
+  .condition-option.downgrade {
+    border-color: var(--warning);
+  }
+
+  .condition-option.downgrade.selected {
+    background-color: rgba(245, 158, 11, 0.1);
+  }
+
+  .condition-label {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+  }
+
+  .condition-description {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+  }
+
+  .condition-note {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+  }
+
+  .note-warning {
+    color: var(--warning);
+    background-color: rgba(245, 158, 11, 0.1);
+    display: block;
+    padding: 0.75rem;
+    border-radius: var(--radius);
+  }
+
+  .note-upgrade {
+    color: var(--success);
+    background-color: rgba(16, 185, 129, 0.1);
+    display: block;
+    padding: 0.75rem;
+    border-radius: var(--radius);
   }
 </style>

@@ -515,5 +515,6 @@ export const initialAppState: AppState = {
   borrowRequests: mockBorrowRequests,
   borrowHistory: mockBorrowHistory,
   friendRequests: mockFriendRequests,
-  notifications: []
+  notifications: [],
+  wishlist: []
 };

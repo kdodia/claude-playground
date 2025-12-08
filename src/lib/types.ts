@@ -47,6 +47,8 @@ export interface BorrowRequest {
   lastNudgedAt?: string; // When the borrower last sent a reminder to the lender
 }
 
+export type ItemCondition = 'excellent' | 'good' | 'fair' | 'poor';
+
 export interface BorrowHistory {
   id: string;
   itemId: string;
@@ -57,6 +59,8 @@ export interface BorrowHistory {
   actualReturnDate?: string;
   rating?: number;
   review?: string;
+  conditionBefore?: ItemCondition;
+  conditionAfter?: ItemCondition;
 }
 
 export interface FriendRequest {
@@ -75,7 +79,7 @@ export interface Item {
   categoryId: string;
   lenderId: string;
   imageUrl: string;
-  condition: 'excellent' | 'good' | 'fair' | 'poor';
+  condition: ItemCondition;
   permissionLevel: PermissionLevel;
   allowedUserIds?: string[]; // for 'specific-users' permission level
   tagIds: string[];
@@ -86,10 +90,18 @@ export interface Item {
   createdAt: string;
 }
 
+export interface WishlistItem {
+  id: string;
+  userId: string;
+  itemId: string;
+  notifyOnAvailable: boolean;
+  addedAt: string;
+}
+
 export interface Notification {
   id: string;
   userId: string;
-  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge';
+  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge' | 'wishlist-available';
   title: string;
   message: string;
   read: boolean;
@@ -107,4 +119,5 @@ export interface AppState {
   borrowHistory: BorrowHistory[];
   friendRequests: FriendRequest[];
   notifications: Notification[];
+  wishlist: WishlistItem[];
 }
