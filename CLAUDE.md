@@ -8,26 +8,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+This project uses [Bun](https://bun.sh) as its package manager and runtime.
+
 ```bash
+# Install dependencies
+bun install                 # Install all dependencies (creates bun.lockb)
+
 # Development server
-npm run dev                 # Start dev server at http://localhost:5173
+bun run dev                 # Start dev server at http://localhost:5173
 
 # Type checking
-npm run check              # Run svelte-check once
-npm run check:watch        # Run svelte-check in watch mode
+bun run check              # Run svelte-check once
+bun run check:watch        # Run svelte-check in watch mode
 
 # Testing
-npm test                   # Run all tests once
-npm run test:watch         # Run tests in watch mode
-npm run test:coverage      # Run tests with coverage report
-npm run test:ui            # Run tests with Vitest UI
+bun run test               # Run all tests once
+bun run test:watch         # Run tests in watch mode
+bun run test:coverage      # Run tests with coverage report
+bun run test:ui            # Run tests with Vitest UI
 
 # Build
-npm run build              # Build for production
-npm run preview            # Preview production build
+bun run build              # Build for production
+bun run preview            # Preview production build
 
 # Git hooks
-npm run prepare            # Setup husky git hooks (runs automatically after install)
+bun run prepare            # Setup husky git hooks (runs automatically after install)
 ```
 
 ## Architecture
