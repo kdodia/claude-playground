@@ -101,7 +101,7 @@
     {:else}
       <div class="items-grid" class:list-mode={view === 'list'}>
         {#each filteredItems as item (item.id)}
-          <ItemCard {item} />
+          <ItemCard {item} navContext="my-items" />
         {/each}
       </div>
     {/if}

@@ -25,6 +25,22 @@
   // The final category ID to use (subcategory if selected, otherwise parent)
   let categoryId = $derived(subcategoryId || parentCategoryId);
 
+  // Track which fields have been touched (for showing errors)
+  let touched = $state({
+    name: false,
+    description: false,
+    imageUrl: false,
+    category: false
+  });
+
+  // Per-field validation
+  let errors = $derived({
+    name: touched.name && name.trim().length === 0 ? 'Item name is required' : '',
+    description: touched.description && description.trim().length === 0 ? 'Description is required' : '',
+    imageUrl: touched.imageUrl && imageUrl.trim().length === 0 ? 'Image URL is required' : '',
+    category: touched.category && categoryId.length === 0 ? 'Please select a category' : ''
+  });
+
   // Form validation
   let isValid = $derived(
     name.trim().length > 0 &&
@@ -33,7 +49,13 @@
     categoryId.length > 0
   );
 
+  // Mark all fields as touched on submit attempt
+  function touchAllFields() {
+    touched = { name: true, description: true, imageUrl: true, category: true };
+  }
+
   function handleSubmit() {
+    touchAllFields();
     if (!isValid) {
       toast = { message: 'Please fill in all required fields', type: 'error' };
       setTimeout(() => (toast = null), TOAST_DURATION_MS);
@@ -89,39 +111,56 @@
         <div class="form-section">
           <h3>Item Details</h3>
 
-          <div class="form-group">
+          <div class="form-group" class:has-error={errors.name}>
             <label for="name">Item Name *</label>
             <input
               type="text"
               id="name"
               bind:value={name}
+              onblur={() => touched.name = true}
               placeholder="e.g., KitchenAid Stand Mixer"
+              aria-invalid={errors.name ? 'true' : undefined}
+              aria-describedby={errors.name ? 'name-error' : undefined}
               required
             />
+            {#if errors.name}
+              <span id="name-error" class="field-error" role="alert">{errors.name}</span>
+            {/if}
           </div>
 
-          <div class="form-group">
+          <div class="form-group" class:has-error={errors.description}>
             <label for="description">Description *</label>
             <textarea
               id="description"
               bind:value={description}
+              onblur={() => touched.description = true}
               placeholder="Describe your item, its features, and any important details..."
               rows="4"
+              aria-invalid={errors.description ? 'true' : undefined}
+              aria-describedby={errors.description ? 'description-error' : undefined}
               required
             ></textarea>
+            {#if errors.description}
+              <span id="description-error" class="field-error" role="alert">{errors.description}</span>
+            {/if}
           </div>
 
-          <div class="form-group">
+          <div class="form-group" class:has-error={errors.imageUrl}>
             <label for="imageUrl">Image URL *</label>
             <input
               type="url"
               id="imageUrl"
               bind:value={imageUrl}
+              onblur={() => touched.imageUrl = true}
               placeholder="https://images.unsplash.com/photo-..."
-              aria-describedby="imageUrl-hint"
+              aria-invalid={errors.imageUrl ? 'true' : undefined}
+              aria-describedby={errors.imageUrl ? 'imageUrl-error imageUrl-hint' : 'imageUrl-hint'}
               required
             />
             <span id="imageUrl-hint" class="form-hint">Use a link to an image from Unsplash or another source</span>
+            {#if errors.imageUrl}
+              <span id="imageUrl-error" class="field-error" role="alert">{errors.imageUrl}</span>
+            {/if}
           </div>
 
           {#if imageUrl}
@@ -135,9 +174,17 @@
           <h3>Category & Condition</h3>
 
           <div class="form-row">
-            <div class="form-group">
+            <div class="form-group" class:has-error={errors.category}>
               <label for="category">Category *</label>
-              <select id="category" bind:value={parentCategoryId} onchange={handleCategoryChange} required>
+              <select
+                id="category"
+                bind:value={parentCategoryId}
+                onchange={handleCategoryChange}
+                onblur={() => touched.category = true}
+                aria-invalid={errors.category ? 'true' : undefined}
+                aria-describedby={errors.category ? 'category-error' : undefined}
+                required
+              >
                 <option value="">Select a category</option>
                 {#each topLevelCategories as category}
                   <option value={category.id}>
@@ -145,6 +192,9 @@
                   </option>
                 {/each}
               </select>
+              {#if errors.category}
+                <span id="category-error" class="field-error" role="alert">{errors.category}</span>
+              {/if}
             </div>
 
             {#if subcategories.length > 0}
@@ -296,6 +346,28 @@
   .form-group textarea,
   .form-group select {
     width: 100%;
+  }
+
+  /* Error states */
+  .form-group.has-error input,
+  .form-group.has-error textarea,
+  .form-group.has-error select {
+    border-color: var(--error);
+  }
+
+  .form-group.has-error input:focus,
+  .form-group.has-error textarea:focus,
+  .form-group.has-error select:focus {
+    outline-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  }
+
+  .field-error {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.8125rem;
+    color: var(--error);
+    font-weight: 500;
   }
 
   .form-hint {

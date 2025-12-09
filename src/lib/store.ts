@@ -158,10 +158,10 @@ function createAppStore() {
               `${lender.name} approved your request to borrow ${item.name}`,
               requestId
             );
-          } else if (updates.status === 'denied') {
+          } else if (updates.status === 'declined') {
             notification = createNotification(
               request.borrowerId,
-              'request-denied',
+              'request-declined',
               'Request Declined',
               `${lender.name} declined your request to borrow ${item.name}`,
               requestId

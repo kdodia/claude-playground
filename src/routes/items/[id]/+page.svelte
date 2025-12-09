@@ -14,6 +14,17 @@
   let categoryPath = $derived(item ? getCategoryPath(item.categoryId, $appStore) : []);
   let permissionInfo = $derived(item ? getPermissionLevelInfo(item.permissionLevel) : null);
 
+  // Navigation context from URL params for context-aware breadcrumbs
+  let navContext = $derived($page.url.searchParams.get('from'));
+  let navUserId = $derived($page.url.searchParams.get('userId'));
+  let navUserName = $derived.by(() => {
+    if (navUserId) {
+      const user = $appStore.users.find(u => u.id === navUserId);
+      return user?.name ?? null;
+    }
+    return null;
+  });
+
   // Wishlist state
   let wishlistEntry = $derived(
     $appStore.wishlist.find(
@@ -204,13 +215,27 @@
 {:else}
   <div class="item-detail-page fade-in">
     <div class="container">
-      <div class="breadcrumbs">
-        <a href="/">Browse</a>
-        {#each categoryPath as cat}
-          <span class="breadcrumb-sep">›</span>
-          <span>{cat}</span>
-        {/each}
-      </div>
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        {#if navContext === 'profile' && navUserId && navUserName}
+          <a href="/profile/{navUserId}">{navUserName}'s Profile</a>
+          <span class="breadcrumb-sep" aria-hidden="true">›</span>
+          <span>Items</span>
+        {:else if navContext === 'my-items'}
+          <a href="/my-items">My Items</a>
+        {:else if navContext === 'wishlist'}
+          <a href="/wishlist">Wishlist</a>
+        {:else if navContext === 'dashboard'}
+          <a href="/dashboard">Dashboard</a>
+        {:else}
+          <a href="/">Browse</a>
+          {#each categoryPath as cat}
+            <span class="breadcrumb-sep" aria-hidden="true">›</span>
+            <span>{cat}</span>
+          {/each}
+        {/if}
+        <span class="breadcrumb-sep" aria-hidden="true">›</span>
+        <span class="breadcrumb-current" aria-current="page">{item.name}</span>
+      </nav>
 
       <div class="item-detail-grid">
         <div class="item-main">
@@ -527,6 +552,15 @@
 
   .breadcrumb-sep {
     color: var(--text-muted);
+  }
+
+  .breadcrumb-current {
+    color: var(--text-primary);
+    font-weight: 500;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .item-detail-grid {

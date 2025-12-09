@@ -6,9 +6,24 @@
 
   interface Props {
     item: Item;
+    navContext?: 'browse' | 'profile' | 'my-items' | 'wishlist' | 'dashboard';
+    navUserId?: string;
   }
 
-  let { item }: Props = $props();
+  let { item, navContext = 'browse', navUserId }: Props = $props();
+
+  // Build the item URL with navigation context
+  let itemUrl = $derived.by(() => {
+    const params = new URLSearchParams();
+    if (navContext !== 'browse') {
+      params.set('from', navContext);
+    }
+    if (navUserId) {
+      params.set('userId', navUserId);
+    }
+    const queryString = params.toString();
+    return `/items/${item.id}${queryString ? `?${queryString}` : ''}`;
+  });
 
   const lender = derived(appStore, ($state) =>
     $state.users.find((u) => u.id === item.lenderId)
@@ -17,7 +32,7 @@
   const permissionInfo = $derived(getPermissionLevelInfo(item.permissionLevel));
 </script>
 
-<a href="/items/{item.id}" class="item-card card">
+<a href={itemUrl} class="item-card card">
   <div class="item-image">
     <FallbackImage src={item.imageUrl} alt={item.name} fallbackType="item" />
     <div class="permission-badge" style="background-color: {permissionInfo.color};">

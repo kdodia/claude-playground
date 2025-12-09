@@ -1,12 +1,34 @@
 <script lang="ts">
   import { appStore, incomingRequests, outgoingRequests, activeLoans } from '$lib/store';
   import Toast from '$lib/components/Toast.svelte';
+  import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import { MAX_RATING, MIN_RATING, DEFAULT_RATING } from '$lib/constants';
   import { useToast } from '$lib/useToast.svelte';
   import type { ItemCondition } from '$lib/types';
 
   let activeTab = $state<'incoming' | 'outgoing' | 'active'>('incoming');
   const { toast, showToast, clearToast } = useToast();
+
+  // Confirmation dialog state
+  let confirmDialog = $state<{
+    open: boolean;
+    title: string;
+    message: string;
+    confirmLabel: string;
+    variant: 'danger' | 'warning' | 'default';
+    onConfirm: () => void;
+  }>({
+    open: false,
+    title: '',
+    message: '',
+    confirmLabel: '',
+    variant: 'default',
+    onConfirm: () => {}
+  });
+
+  function closeConfirmDialog() {
+    confirmDialog = { ...confirmDialog, open: false };
+  }
 
   // Return modal state
   let showReturnModal = $state(false);
@@ -33,14 +55,34 @@
     poor: { label: 'Poor', description: 'Significant wear, still usable' }
   };
 
-  function approveRequest(requestId: string) {
-    appStore.updateBorrowRequest(requestId, { status: 'approved' });
-    showToast('Request approved!', 'success');
+  function confirmApproveRequest(requestId: string, itemName: string, borrowerName: string) {
+    confirmDialog = {
+      open: true,
+      title: 'Approve Request',
+      message: `Are you sure you want to approve ${borrowerName}'s request to borrow "${itemName}"?`,
+      confirmLabel: 'Approve',
+      variant: 'default',
+      onConfirm: () => {
+        appStore.updateBorrowRequest(requestId, { status: 'approved' });
+        showToast(`Request from ${borrowerName} approved!`, 'success');
+        closeConfirmDialog();
+      }
+    };
   }
 
-  function denyRequest(requestId: string) {
-    appStore.updateBorrowRequest(requestId, { status: 'denied' });
-    showToast('Request declined', 'error');
+  function confirmDeclineRequest(requestId: string, itemName: string, borrowerName: string) {
+    confirmDialog = {
+      open: true,
+      title: 'Decline Request',
+      message: `Are you sure you want to decline ${borrowerName}'s request to borrow "${itemName}"? They will be notified.`,
+      confirmLabel: 'Decline',
+      variant: 'danger',
+      onConfirm: () => {
+        appStore.updateBorrowRequest(requestId, { status: 'declined' });
+        showToast(`Request from ${borrowerName} declined`, 'error');
+        closeConfirmDialog();
+      }
+    };
   }
 
   function markAsReturned(requestId: string) {
@@ -179,11 +221,11 @@
               {@const borrower = $appStore.users.find((u) => u.id === request.borrowerId)}
               <div class="request-card card">
                 <div class="request-content">
-                  <a href="/items/{item?.id}" class="request-item-link">
+                  <a href="/items/{item?.id}?from=dashboard" class="request-item-link">
                     <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
                   </a>
                   <div class="request-details">
-                    <a href="/items/{item?.id}" class="request-title-link">
+                    <a href="/items/{item?.id}?from=dashboard" class="request-title-link">
                       <h3 class="request-title">{item?.name}</h3>
                     </a>
                     <div class="request-meta">
@@ -211,11 +253,11 @@
                   </div>
                 </div>
                 <div class="request-actions">
-                  <button class="btn btn-primary" onclick={() => approveRequest(request.id)}>
+                  <button class="btn btn-primary" onclick={() => confirmApproveRequest(request.id, item?.name ?? 'this item', borrower?.name ?? 'the borrower')}>
                     ✓ Approve
                   </button>
-                  <button class="btn btn-secondary" onclick={() => denyRequest(request.id)}>
-                    ✗ Deny
+                  <button class="btn btn-secondary" onclick={() => confirmDeclineRequest(request.id, item?.name ?? 'this item', borrower?.name ?? 'the borrower')}>
+                    ✗ Decline
                   </button>
                 </div>
               </div>
@@ -236,11 +278,11 @@
               {@const lender = $appStore.users.find((u) => u.id === request.lenderId)}
               <div class="request-card card">
                 <div class="request-content">
-                  <a href="/items/{item?.id}" class="request-item-link">
+                  <a href="/items/{item?.id}?from=dashboard" class="request-item-link">
                     <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
                   </a>
                   <div class="request-details">
-                    <a href="/items/{item?.id}" class="request-title-link">
+                    <a href="/items/{item?.id}?from=dashboard" class="request-title-link">
                       <h3 class="request-title">{item?.name}</h3>
                     </a>
                     <div class="request-meta">
@@ -263,7 +305,7 @@
                         <span class="badge badge-warning">⏳ Pending</span>
                       {:else if request.status === 'approved'}
                         <span class="badge badge-success">✓ Approved</span>
-                      {:else if request.status === 'denied'}
+                      {:else if request.status === 'declined'}
                         <span class="badge badge-error">✗ Declined</span>
                       {/if}
                     </div>
@@ -287,11 +329,11 @@
               {@const borrower = $appStore.users.find((u) => u.id === loan.borrowerId)}
               <div class="request-card card">
                 <div class="request-content">
-                  <a href="/items/{item?.id}" class="request-item-link">
+                  <a href="/items/{item?.id}?from=dashboard" class="request-item-link">
                     <img src={item?.imageUrl} alt={item?.name} class="request-item-image" />
                   </a>
                   <div class="request-details">
-                    <a href="/items/{item?.id}" class="request-title-link">
+                    <a href="/items/{item?.id}?from=dashboard" class="request-title-link">
                       <h3 class="request-title">{item?.name}</h3>
                     </a>
                     <div class="request-meta">
@@ -437,6 +479,16 @@
 {#if toast}
   <Toast message={toast.message} type={toast.type} onClose={clearToast} />
 {/if}
+
+<ConfirmDialog
+  open={confirmDialog.open}
+  title={confirmDialog.title}
+  message={confirmDialog.message}
+  confirmLabel={confirmDialog.confirmLabel}
+  variant={confirmDialog.variant}
+  onConfirm={confirmDialog.onConfirm}
+  onCancel={closeConfirmDialog}
+/>
 
 <style>
   .page-header {

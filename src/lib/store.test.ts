@@ -371,10 +371,10 @@ describe('appStore actions', () => {
 			};
 			appStore.set(createTestState({ items: [item], borrowRequests: [request] }));
 
-			appStore.updateBorrowRequest('req1', { status: 'denied' });
+			appStore.updateBorrowRequest('req1', { status: 'declined' });
 
 			const state = get(appStore);
-			expect(state.notifications[0].type).toBe('request-denied');
+			expect(state.notifications[0].type).toBe('request-declined');
 		});
 	});
 

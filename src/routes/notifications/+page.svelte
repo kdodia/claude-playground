@@ -58,7 +58,7 @@
                 📥
               {:else if notification.type === 'request-approved'}
                 ✅
-              {:else if notification.type === 'request-denied'}
+              {:else if notification.type === 'request-declined'}
                 ❌
               {:else if notification.type === 'return-reminder'}
                 ⏰

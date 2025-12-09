@@ -17,7 +17,7 @@ A fully interactive prototype for a distributed library of things - a social pla
 - **Item Permissions**: Set who can see and borrow each item (specific users, close friends, friends, friends-of-friends, neighbors)
 
 ### Owner Dashboard
-- **Incoming Requests**: Approve or deny borrow requests with one click
+- **Incoming Requests**: Approve or decline borrow requests with one click
 - **Outgoing Requests**: Track your own borrow requests and their status
 - **Active Loans**: Manage items currently borrowed and mark them as returned
 - **Real-time Notifications**: Get notified of requests, approvals, and returns
@@ -73,7 +73,7 @@ The app will be available at `http://localhost:5173`
 
 ### As an Owner
 1. **Manage Items**: View all your items in "My Items"
-2. **Handle Requests**: Go to Dashboard to approve/deny incoming requests
+2. **Handle Requests**: Go to Dashboard to approve/decline incoming requests
 3. **Track Loans**: See active loans and mark items as returned
 4. **Organize with Tags**: Create collections in the Tags page
 
@@ -146,7 +146,7 @@ The app comes with 4 pre-populated users:
 
 ### Complete User Journeys
 - **Borrower Flow**: Browse → View Details → Request → Get Notified → Return
-- **Lender Flow**: Receive Request → Review → Approve/Deny → Track Return
+- **Lender Flow**: Receive Request → Review → Approve/Decline → Track Return
 
 ### Data Relationships
 - Hierarchical categories (Kitchen → Small Appliances → Coffee Makers)

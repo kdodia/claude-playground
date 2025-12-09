@@ -42,8 +42,9 @@
   {/if}
 
   {#if isLoading && !hasError}
-    <div class="placeholder loading-placeholder" aria-hidden="true">
+    <div class="placeholder loading-placeholder" role="status" aria-live="polite" aria-label="Loading image">
       <div class="shimmer"></div>
+      <span class="sr-only">Loading image...</span>
     </div>
   {/if}
 
@@ -127,6 +128,18 @@
   .placeholder-text {
     font-size: 0.75rem;
     opacity: 0.6;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   /* Avatar-specific styles */

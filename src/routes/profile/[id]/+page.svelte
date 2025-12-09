@@ -114,7 +114,7 @@
           {:else}
             <div class="items-grid">
               {#each userItems as item (item.id)}
-                <ItemCard {item} />
+                <ItemCard {item} navContext="profile" navUserId={userId} />
               {/each}
             </div>
           {/if}
@@ -173,7 +173,7 @@
                         <span class="badge badge-success">Approved</span>
                       {:else if status === 'pending'}
                         <span class="badge badge-warning">Pending</span>
-                      {:else if status === 'denied'}
+                      {:else if status === 'declined'}
                         <span class="badge badge-error">Declined</span>
                       {:else if status === 'cancelled'}
                         <span class="badge">Cancelled</span>
@@ -192,7 +192,7 @@
                           day: 'numeric',
                           year: 'numeric'
                         })}
-                      {:else if status === 'denied' || status === 'cancelled'}
+                      {:else if status === 'declined' || status === 'cancelled'}
                         {new Date('createdAt' in activity ? activity.createdAt : activity.endDate).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',

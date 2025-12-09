@@ -41,7 +41,7 @@ export interface BorrowRequest {
   lenderId: string;
   startDate: string;
   endDate: string;
-  status: 'pending' | 'approved' | 'denied' | 'active' | 'completed' | 'cancelled';
+  status: 'pending' | 'approved' | 'declined' | 'active' | 'completed' | 'cancelled';
   message?: string;
   createdAt: string;
   lastNudgedAt?: string; // When the borrower last sent a reminder to the lender
@@ -101,7 +101,7 @@ export interface WishlistItem {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'borrow-request' | 'request-approved' | 'request-denied' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge' | 'wishlist-available';
+  type: 'borrow-request' | 'request-approved' | 'request-declined' | 'return-reminder' | 'item-returned' | 'friend-request' | 'friend-request-accepted' | 'request-nudge' | 'wishlist-available';
   title: string;
   message: string;
   read: boolean;

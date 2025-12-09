@@ -50,7 +50,7 @@
       <div class="wishlist-grid">
         {#each $currentUserWishlistItems as entry (entry.id)}
           <div class="wishlist-item-wrapper">
-            <ItemCard item={entry.item} />
+            <ItemCard item={entry.item} navContext="wishlist" />
             <div class="wishlist-actions">
               <div class="notification-control">
                 <label class="toggle-label">

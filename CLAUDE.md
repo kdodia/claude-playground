@@ -113,7 +113,7 @@ The `src/lib/useToast.svelte.ts` module exports `showToast()` function for user 
 
 All user actions persist via localStorage:
 - Creating/updating/deleting items
-- Sending/approving/denying borrow requests
+- Sending/approving/declining borrow requests
 - Creating tags and adding items to tags
 - Friend requests and relationships
 - Notifications and read status
