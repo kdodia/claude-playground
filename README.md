@@ -45,22 +45,25 @@ A social platform for sharing underutilized items with friends, friends-of-frien
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ installed
+- [Bun](https://bun.sh) installed (or Node.js 18+ with npm)
 
 ### Installation
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Start development server
-npm run dev
+bun run dev
 
 # Build for production
-npm run build
+bun run build
 
 # Preview production build
-npm run preview
+bun run preview
+
+# Run tests
+bun run test
 ```
 
 The app will be available at `http://localhost:5173`
@@ -89,10 +92,12 @@ Each item has permission levels:
 
 ## 🎨 Tech Stack
 
-- **Framework**: SvelteKit with TypeScript
+- **Runtime**: [Bun](https://bun.sh) (package manager and runtime)
+- **Framework**: SvelteKit with Svelte 5 and TypeScript
 - **Routing**: SvelteKit file-based routing
 - **State Management**: Svelte stores with localStorage persistence
 - **Styling**: Scoped CSS with CSS custom properties
+- **Testing**: Vitest with Testing Library
 - **Data**: In-memory mock data with localStorage sync
 
 ## 🗂️ Project Structure
