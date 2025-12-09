@@ -4,12 +4,56 @@
   import Toast from '$lib/components/Toast.svelte';
   import { TOAST_DURATION_MS } from '$lib/constants';
 
+  // Pagination
+  const ITEMS_PER_PAGE = 12;
+  let currentPage = $state(1);
+
   let toast = $state<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Pagination calculations
+  let totalPages = $derived(Math.ceil($currentUserWishlistItems.length / ITEMS_PER_PAGE));
+
+  let paginatedItems = $derived(
+    $currentUserWishlistItems.slice(
+      (currentPage - 1) * ITEMS_PER_PAGE,
+      currentPage * ITEMS_PER_PAGE
+    )
+  );
+
+  let pageNumbers = $derived.by(() => {
+    const pages: (number | 'ellipsis')[] = [];
+    const total = totalPages;
+    const current = currentPage;
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current > 3) pages.push('ellipsis');
+      for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+        pages.push(i);
+      }
+      if (current < total - 2) pages.push('ellipsis');
+      if (total > 1) pages.push(total);
+    }
+    return pages;
+  });
+
+  function goToPage(page: number) {
+    if (page >= 1 && page <= totalPages) {
+      currentPage = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   function removeFromWishlist(itemId: string) {
     appStore.removeFromWishlist(itemId);
     toast = { message: 'Removed from wishlist', type: 'success' };
     setTimeout(() => (toast = null), TOAST_DURATION_MS);
+    // Reset page if we removed the last item on this page
+    if (paginatedItems.length === 1 && currentPage > 1) {
+      currentPage = currentPage - 1;
+    }
   }
 
   function toggleNotification(itemId: string, currentState: boolean) {
@@ -45,10 +89,15 @@
           <span class="stat-value">{$currentUserWishlistItems.filter(w => w.notifyOnAvailable).length}</span>
           <span class="stat-label">with notifications</span>
         </span>
+        {#if totalPages > 1}
+          <span class="stat">
+            <span class="stat-label">Page {currentPage} of {totalPages}</span>
+          </span>
+        {/if}
       </div>
 
       <div class="wishlist-grid">
-        {#each $currentUserWishlistItems as entry (entry.id)}
+        {#each paginatedItems as entry (entry.id)}
           <div class="wishlist-item-wrapper">
             <ItemCard item={entry.item} navContext="wishlist" />
             <div class="wishlist-actions">
@@ -81,6 +130,46 @@
           </div>
         {/each}
       </div>
+
+      {#if totalPages > 1}
+        <nav class="pagination" aria-label="Wishlist pagination">
+          <button
+            class="pagination-btn"
+            onclick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            aria-label="Go to previous page"
+          >
+            ← Previous
+          </button>
+
+          <div class="pagination-pages">
+            {#each pageNumbers as page}
+              {#if page === 'ellipsis'}
+                <span class="pagination-ellipsis" aria-hidden="true">…</span>
+              {:else}
+                <button
+                  class="pagination-page"
+                  class:active={page === currentPage}
+                  onclick={() => goToPage(page)}
+                  aria-label="Go to page {page}"
+                  aria-current={page === currentPage ? 'page' : undefined}
+                >
+                  {page}
+                </button>
+              {/if}
+            {/each}
+          </div>
+
+          <button
+            class="pagination-btn"
+            onclick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            aria-label="Go to next page"
+          >
+            Next →
+          </button>
+        </nav>
+      {/if}
     {:else}
       <div class="empty-state">
         <span class="empty-icon" aria-hidden="true">💝</span>
@@ -268,6 +357,78 @@
     margin-right: auto;
   }
 
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .pagination-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background-color: var(--surface);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .pagination-page {
+    min-width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+  }
+
+  .pagination-page:hover {
+    background-color: var(--surface);
+    color: var(--text-primary);
+  }
+
+  .pagination-page.active {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .pagination-ellipsis {
+    min-width: 2.25rem;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
   @media (max-width: 768px) {
     .page-title {
       font-size: 1.5rem;
@@ -283,6 +444,22 @@
 
     .wishlist-grid {
       grid-template-columns: 1fr;
+    }
+
+    .pagination {
+      flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .pagination-pages {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.5rem;
     }
   }
 </style>

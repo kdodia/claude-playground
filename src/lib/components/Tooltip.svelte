@@ -14,6 +14,7 @@
 
 <span
   class="tooltip-wrapper"
+  role="none"
   onmouseenter={() => showTooltip = true}
   onmouseleave={() => showTooltip = false}
   onfocus={() => showTooltip = true}
