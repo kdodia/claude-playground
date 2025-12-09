@@ -1,4 +1,4 @@
-// Core data types for the distributed library app
+// Core data types for The Lovely Commons app
 
 export type PermissionLevel = 'specific-users' | 'close-friends' | 'friends' | 'friends-of-friends' | 'neighbors';
 

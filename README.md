@@ -1,6 +1,8 @@
-# Library of Things
+# The Lovely Commons
 
-A fully interactive prototype for a distributed library of things - a social platform that helps people share underutilized items with friends, friends-of-friends, and neighbors.
+*things held in common*
+
+A social platform for sharing underutilized items with friends, friends-of-friends, and neighbors—shifting ownership from individual possession to collective stewardship.
 
 ## 🌟 Features
 
@@ -175,7 +177,7 @@ All user actions persist in localStorage:
 
 To reset data, open browser console and run:
 ```javascript
-localStorage.removeItem('distributed-library-app-state')
+localStorage.removeItem('the-lovely-commons-state')
 ```
 Then refresh the page.
 
@@ -206,3 +208,7 @@ This is a prototype/proof-of-concept project.
 ---
 
 Built with ❤️ using SvelteKit and TypeScript
+
+---
+
+*The Lovely Commons — things held in common*

@@ -3,7 +3,7 @@ import { browser } from '$app/environment';
 import type { AppState, Item, User, BorrowRequest, Notification, BorrowHistory, Tag, FriendRequest, ItemCondition, WishlistItem } from './types';
 import { initialAppState } from './mockData';
 
-const STORAGE_KEY = 'distributed-library-app-state';
+const STORAGE_KEY = 'the-lovely-commons-state';
 
 // Load state from localStorage or use initial state
 function loadState(): AppState {

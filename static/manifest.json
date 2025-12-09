@@ -1,6 +1,6 @@
 {
-	"name": "Library of Things",
-	"short_name": "LibOfThings",
+	"name": "The Lovely Commons",
+	"short_name": "LovelyCommons",
 	"description": "Share and borrow items with friends, neighbors, and your community",
 	"start_url": "/",
 	"display": "standalone",

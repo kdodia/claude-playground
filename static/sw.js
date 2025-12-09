@@ -1,5 +1,5 @@
-// Service Worker for Library of Things PWA
-const CACHE_NAME = 'library-of-things-v1';
+// Service Worker for The Lovely Commons PWA
+const CACHE_NAME = 'the-lovely-commons-v1';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache immediately on install

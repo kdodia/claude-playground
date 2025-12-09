@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-"Library of Things" is a SvelteKit-based prototype for a distributed library platform where users can share underutilized items with friends, friends-of-friends, and neighbors. The app demonstrates a complete lending/borrowing workflow with a sophisticated permission system, calendar-based availability, and social features.
+"The Lovely Commons" (*things held in common*) is a SvelteKit-based prototype for a social sharing platform where users can share underutilized items with friends, friends-of-friends, and neighbors—shifting ownership from individual possession to collective stewardship. The app demonstrates a complete lending/borrowing workflow with a sophisticated permission system, calendar-based availability, and social features.
 
 ## Development Commands
 
@@ -46,7 +46,7 @@ The app uses a centralized Svelte store (`src/lib/store.ts`) with localStorage p
 - **Action methods**: All state mutations go through store methods (e.g., `createBorrowRequest`, `updateItem`, `addToWishlist`)
 - **Automatic persistence**: State automatically syncs to localStorage on every change
 - **Cross-tab sync**: Uses storage events to sync state across browser tabs
-- **Reset mechanism**: `appStore.reset()` or clear localStorage key `distributed-library-app-state`
+- **Reset mechanism**: `appStore.reset()` or clear localStorage key `the-lovely-commons-state`
 
 ### Permission System
 
@@ -121,7 +121,7 @@ All user actions persist via localStorage:
 
 To reset during development:
 ```javascript
-localStorage.removeItem('distributed-library-app-state')
+localStorage.removeItem('the-lovely-commons-state')
 // Then refresh the page
 ```
 

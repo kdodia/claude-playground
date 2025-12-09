@@ -22,7 +22,7 @@
   }
 
   function confirmReset() {
-    localStorage.removeItem('distributed-library-app-state');
+    localStorage.removeItem('the-lovely-commons-state');
     window.location.reload();
   }
 
@@ -51,7 +51,7 @@
     <div class="container nav-content">
       <a href="/" class="logo">
         <span class="logo-icon" aria-hidden="true">📚</span>
-        <span class="logo-text">Library of Things</span>
+        <span class="logo-text">The Lovely Commons</span>
       </a>
 
       <div class="nav-links">
