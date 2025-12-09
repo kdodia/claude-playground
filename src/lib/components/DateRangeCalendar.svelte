@@ -131,6 +131,25 @@
     viewDate = new Date();
   }
 
+  // Quick navigation - jump to specific month/year
+  let showMonthPicker = $state(false);
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  // Available years: current year and next 2 years
+  let availableYears = $derived.by(() => {
+    const currentYear = new Date().getFullYear();
+    return [currentYear, currentYear + 1, currentYear + 2];
+  });
+
+  function jumpToMonth(month: number, year: number) {
+    viewDate = new Date(year, month, 1);
+    showMonthPicker = false;
+  }
+
   // Check if prev month button should be disabled
   let canGoPrev = $derived.by(() => {
     const prevMonthEnd = new Date(viewDate.getFullYear(), viewDate.getMonth(), 0);
@@ -195,7 +214,16 @@
     </button>
 
     <div class="month-display">
-      <span class="month-name">{monthDisplay}</span>
+      <button
+        type="button"
+        class="month-name-btn"
+        onclick={() => showMonthPicker = !showMonthPicker}
+        aria-expanded={showMonthPicker}
+        aria-haspopup="true"
+      >
+        <span class="month-name">{monthDisplay}</span>
+        <span class="dropdown-arrow" aria-hidden="true">{showMonthPicker ? '▲' : '▼'}</span>
+      </button>
       <button type="button" class="today-btn" onclick={goToToday}>Today</button>
     </div>
 
@@ -203,6 +231,32 @@
       <span aria-hidden="true">&rarr;</span>
     </button>
   </div>
+
+  {#if showMonthPicker}
+    <div class="month-picker">
+      {#each availableYears as year}
+        <div class="year-section">
+          <h4 class="year-heading">{year}</h4>
+          <div class="month-grid">
+            {#each monthNames as month, i}
+              {@const isPastMonth = new Date(year, i + 1, 0) < minDate}
+              {@const isCurrentView = viewDate.getFullYear() === year && viewDate.getMonth() === i}
+              <button
+                type="button"
+                class="month-btn"
+                class:current={isCurrentView}
+                class:disabled={isPastMonth}
+                disabled={isPastMonth}
+                onclick={() => jumpToMonth(i, year)}
+              >
+                {month.substring(0, 3)}
+              </button>
+            {/each}
+          </div>
+        </div>
+      {/each}
+    </div>
+  {/if}
 
   <div class="calendar-legend">
     <div class="legend-item">
@@ -321,10 +375,29 @@
     gap: 0.25rem;
   }
 
+  .month-name-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius);
+    transition: all var(--transition);
+    cursor: pointer;
+  }
+
+  .month-name-btn:hover {
+    background-color: var(--surface);
+  }
+
   .month-name {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-primary);
+  }
+
+  .dropdown-arrow {
+    font-size: 0.625rem;
+    color: var(--text-muted);
   }
 
   .today-btn {
@@ -337,6 +410,64 @@
 
   .today-btn:hover {
     background-color: rgba(16, 185, 129, 0.1);
+  }
+
+  /* Month Picker */
+  .month-picker {
+    position: relative;
+    padding: 1rem;
+    background-color: var(--surface);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .year-section {
+    margin-bottom: 1rem;
+  }
+
+  .year-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .year-heading {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .month-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.375rem;
+  }
+
+  .month-btn {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    transition: all var(--transition);
+    cursor: pointer;
+  }
+
+  .month-btn:hover:not(:disabled) {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--primary);
+  }
+
+  .month-btn.current {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .month-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   .calendar-legend {

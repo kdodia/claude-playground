@@ -237,36 +237,49 @@
 
         <div class="form-section">
           <h3>Who Can Borrow This?</h3>
+          <p class="section-hint">Choose who can see and request to borrow this item. You can always change this later.</p>
 
           <fieldset class="form-group">
-            <legend>Permission Level</legend>
+            <legend class="sr-only">Permission Level</legend>
             <div class="radio-group-vertical">
               <label class="radio-label-vertical">
                 <input type="radio" bind:group={permissionLevel} value="close-friends" />
                 <div class="permission-info">
-                  <span class="permission-title">Close Friends Only</span>
-                  <span class="permission-desc">Your most trusted circle</span>
+                  <span class="permission-title">
+                    <span class="permission-icon" aria-hidden="true">💚</span>
+                    Close Friends Only
+                  </span>
+                  <span class="permission-desc">Only people you've marked as close friends can see this item. Best for valuable or personal items.</span>
                 </div>
               </label>
               <label class="radio-label-vertical">
                 <input type="radio" bind:group={permissionLevel} value="friends" />
                 <div class="permission-info">
-                  <span class="permission-title">Friends</span>
-                  <span class="permission-desc">All your friends can see and borrow</span>
+                  <span class="permission-title">
+                    <span class="permission-icon" aria-hidden="true">💛</span>
+                    Friends
+                  </span>
+                  <span class="permission-desc">All your friends can see and request this item. A good default for most items.</span>
                 </div>
               </label>
               <label class="radio-label-vertical">
                 <input type="radio" bind:group={permissionLevel} value="friends-of-friends" />
                 <div class="permission-info">
-                  <span class="permission-title">Friends of Friends</span>
-                  <span class="permission-desc">Extended network</span>
+                  <span class="permission-title">
+                    <span class="permission-icon" aria-hidden="true">🧡</span>
+                    Friends of Friends
+                  </span>
+                  <span class="permission-desc">Your friends and their friends can see this item. Great for expanding your sharing network.</span>
                 </div>
               </label>
               <label class="radio-label-vertical">
                 <input type="radio" bind:group={permissionLevel} value="neighbors" />
                 <div class="permission-info">
-                  <span class="permission-title">Neighbors</span>
-                  <span class="permission-desc">Anyone in your area</span>
+                  <span class="permission-title">
+                    <span class="permission-icon" aria-hidden="true">❤️</span>
+                    Neighbors
+                  </span>
+                  <span class="permission-desc">Anyone in your city can see and request this item. Maximum reach for community sharing!</span>
                 </div>
               </label>
             </div>
@@ -326,8 +339,27 @@
   .form-section h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    margin: 0 0 1.5rem 0;
+    margin: 0 0 0.5rem 0;
     color: var(--text-primary);
+  }
+
+  .section-hint {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.5;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 
   .form-group {
@@ -469,13 +501,21 @@
   }
 
   .permission-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-weight: 600;
     font-size: 0.9375rem;
+  }
+
+  .permission-icon {
+    font-size: 1rem;
   }
 
   .permission-desc {
     font-size: 0.8125rem;
     color: var(--text-secondary);
+    line-height: 1.5;
   }
 
   .form-actions {

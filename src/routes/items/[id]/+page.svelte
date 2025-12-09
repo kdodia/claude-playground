@@ -4,8 +4,16 @@
   import { goto } from '$app/navigation';
   import Toast from '$lib/components/Toast.svelte';
   import DateRangeCalendar from '$lib/components/DateRangeCalendar.svelte';
-  import type { BorrowRequest } from '$lib/types';
+  import type { BorrowRequest, PermissionLevel } from '$lib/types';
   import { NUDGE_DELAY_DAYS, TOAST_DURATION_MS } from '$lib/constants';
+
+  // Permission level options with descriptions
+  const permissionOptions: Array<{ value: PermissionLevel; label: string; icon: string; description: string }> = [
+    { value: 'close-friends', label: 'Close Friends Only', icon: '💚', description: 'Your most trusted circle' },
+    { value: 'friends', label: 'Friends', icon: '💛', description: 'All your friends' },
+    { value: 'friends-of-friends', label: 'Friends of Friends', icon: '🧡', description: 'Extended network' },
+    { value: 'neighbors', label: 'Neighbors', icon: '❤️', description: 'Anyone in your city' }
+  ];
 
   let itemId = $derived($page.params.id);
   let item = $derived($appStore.items.find((i) => i.id === itemId));
@@ -202,6 +210,22 @@
     };
     setTimeout(() => (toast = null), TOAST_DURATION_MS);
   }
+
+  // Inline permission editing for owners
+  let isEditingPermission = $state(false);
+  let isOwner = $derived(item?.lenderId === $appStore.currentUserId);
+
+  function updatePermissionLevel(newLevel: PermissionLevel) {
+    if (!item) return;
+    appStore.updateItem(item.id, { permissionLevel: newLevel });
+    const levelInfo = permissionOptions.find(o => o.value === newLevel);
+    toast = {
+      message: `Permission updated to "${levelInfo?.label}"`,
+      type: 'success'
+    };
+    isEditingPermission = false;
+    setTimeout(() => (toast = null), TOAST_DURATION_MS);
+  }
 </script>
 
 {#if !item}
@@ -293,25 +317,54 @@
             </div>
 
             {#if permissionInfo}
-              <div class="permission-card">
+              <div class="permission-card" class:editing={isEditingPermission}>
                 <div class="permission-header">
-                  <span class="permission-icon">{permissionInfo.icon}</span>
-                  <div>
+                  <span class="permission-icon-large">{permissionInfo.icon}</span>
+                  <div class="permission-header-content">
                     <h4>Who Can Borrow This</h4>
-                    <p class="permission-level">{permissionInfo.label}</p>
+                    {#if isEditingPermission && isOwner}
+                      <div class="permission-edit-options">
+                        {#each permissionOptions as option (option.value)}
+                          <button
+                            class="permission-option"
+                            class:selected={item.permissionLevel === option.value}
+                            onclick={() => updatePermissionLevel(option.value)}
+                          >
+                            <span class="option-icon" aria-hidden="true">{option.icon}</span>
+                            <span class="option-label">{option.label}</span>
+                          </button>
+                        {/each}
+                        <button class="btn btn-sm btn-secondary" onclick={() => isEditingPermission = false}>
+                          Cancel
+                        </button>
+                      </div>
+                    {:else}
+                      <p class="permission-level">{permissionInfo.label}</p>
+                    {/if}
                   </div>
-                </div>
-                <p class="permission-description">
-                  {#if item.permissionLevel === 'close-friends'}
-                    This item is available only to {lender?.name}'s close friends
-                  {:else if item.permissionLevel === 'friends'}
-                    This item is available to all of {lender?.name}'s friends
-                  {:else if item.permissionLevel === 'friends-of-friends'}
-                    This item is available to friends and their extended network
-                  {:else if item.permissionLevel === 'neighbors'}
-                    This item is available to anyone in {lender?.address?.city}
+                  {#if isOwner && !isEditingPermission}
+                    <button
+                      class="edit-permission-btn"
+                      onclick={() => isEditingPermission = true}
+                      aria-label="Change permission level"
+                    >
+                      <span aria-hidden="true">✏️</span>
+                    </button>
                   {/if}
-                </p>
+                </div>
+                {#if !isEditingPermission}
+                  <p class="permission-description">
+                    {#if item.permissionLevel === 'close-friends'}
+                      {isOwner ? 'Only your close friends can see and borrow this item.' : `This item is available only to ${lender?.name}'s close friends.`}
+                    {:else if item.permissionLevel === 'friends'}
+                      {isOwner ? 'All your friends can see and borrow this item.' : `This item is available to all of ${lender?.name}'s friends.`}
+                    {:else if item.permissionLevel === 'friends-of-friends'}
+                      {isOwner ? 'Friends and their friends can see and borrow this item.' : 'This item is available to friends and their extended network.'}
+                    {:else if item.permissionLevel === 'neighbors'}
+                      {isOwner ? `Anyone in ${currentUser?.address?.city ?? 'your city'} can see and borrow this item.` : `This item is available to anyone in ${lender?.address?.city}.`}
+                    {/if}
+                  </p>
+                {/if}
               </div>
             {/if}
 
@@ -799,16 +852,24 @@
     border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     border: 2px solid var(--border);
+    transition: border-color var(--transition);
+  }
+
+  .permission-card.editing {
+    border-color: var(--primary);
   }
 
   .permission-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 1rem;
-    margin-bottom: 1rem;
   }
 
-  .permission-icon {
+  .permission-header-content {
+    flex: 1;
+  }
+
+  .permission-icon-large {
     font-size: 2.5rem;
     flex-shrink: 0;
   }
@@ -828,10 +889,65 @@
   }
 
   .permission-description {
-    margin: 0;
+    margin: 1rem 0 0 0;
     font-size: 0.875rem;
     line-height: 1.6;
     color: var(--text-secondary);
+  }
+
+  .edit-permission-btn {
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: background-color var(--transition);
+    flex-shrink: 0;
+  }
+
+  .edit-permission-btn:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+  }
+
+  .permission-edit-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .permission-option {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background-color: var(--background);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+
+  .permission-option:hover {
+    border-color: var(--primary);
+    background-color: rgba(16, 185, 129, 0.05);
+  }
+
+  .permission-option.selected {
+    border-color: var(--primary);
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--primary);
+  }
+
+  .option-icon {
+    font-size: 1rem;
+  }
+
+  .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .lender-label {
