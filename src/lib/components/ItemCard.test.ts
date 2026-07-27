@@ -108,6 +108,14 @@ describe('ItemCard', () => {
 		expect(screen.getByText(expectedText)).toBeInTheDocument();
 	});
 
+	it('does not append an ellipsis to short descriptions', () => {
+		const item = createTestItem({ description: 'Short and sweet' });
+		render(ItemCard, { props: { item } });
+
+		expect(screen.getByText('Short and sweet')).toBeInTheDocument();
+		expect(screen.queryByText('Short and sweet...')).not.toBeInTheDocument();
+	});
+
 	it('shows unavailable badge when item is borrowed', () => {
 		const item = createTestItem({ available: false });
 		render(ItemCard, { props: { item } });
