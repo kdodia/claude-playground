@@ -1,7 +1,7 @@
 <script lang="ts">
   import '../app.css';
   import { page } from '$app/stores';
-  import { appStore, currentUser, unreadNotificationsCount } from '$lib/store';
+  import { appStore, currentUser, unreadNotificationsCount, STORAGE_KEY } from '$lib/store';
 
   let { children } = $props();
 
@@ -22,7 +22,8 @@
   }
 
   function confirmReset() {
-    localStorage.removeItem('distributed-library-app-state');
+    localStorage.removeItem(STORAGE_KEY);
+    appStore.reset();
     window.location.reload();
   }
 
