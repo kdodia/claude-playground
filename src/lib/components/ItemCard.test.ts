@@ -67,7 +67,7 @@ function createTestItem(overrides: Partial<Item> = {}): Item {
 
 describe('ItemCard', () => {
 	beforeEach(() => {
-		appStore.set(createTestState());
+		appStore.replaceState(createTestState());
 	});
 
 	it('renders item name', () => {
@@ -180,7 +180,7 @@ describe('ItemCard', () => {
 
 describe('ItemCard permission badges', () => {
 	beforeEach(() => {
-		appStore.set(createTestState());
+		appStore.replaceState(createTestState());
 	});
 
 	it('shows correct icon for close-friends permission', () => {
@@ -215,7 +215,7 @@ describe('ItemCard permission badges', () => {
 
 describe('ItemCard conditions', () => {
 	beforeEach(() => {
-		appStore.set(createTestState());
+		appStore.replaceState(createTestState());
 	});
 
 	const conditions: Array<'excellent' | 'good' | 'fair' | 'poor'> = ['excellent', 'good', 'fair', 'poor'];

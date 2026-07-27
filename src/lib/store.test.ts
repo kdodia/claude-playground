@@ -250,7 +250,7 @@ describe('canUserViewItem', () => {
 describe('appStore actions', () => {
 	beforeEach(() => {
 		// Reset store to known state before each test
-		appStore.set(createTestState());
+		appStore.replaceState(createTestState());
 	});
 
 	describe('setCurrentUser', () => {
@@ -274,7 +274,7 @@ describe('appStore actions', () => {
 	describe('updateItem', () => {
 		it('updates an existing item', () => {
 			const item = createTestItem();
-			appStore.set(createTestState({ items: [item] }));
+			appStore.replaceState(createTestState({ items: [item] }));
 
 			appStore.updateItem('item1', { name: 'Updated Name', condition: 'excellent' });
 
@@ -286,7 +286,7 @@ describe('appStore actions', () => {
 		it('does not affect other items', () => {
 			const item1 = createTestItem({ id: 'item1', name: 'Item 1' });
 			const item2 = createTestItem({ id: 'item2', name: 'Item 2' });
-			appStore.set(createTestState({ items: [item1, item2] }));
+			appStore.replaceState(createTestState({ items: [item1, item2] }));
 
 			appStore.updateItem('item1', { name: 'Updated' });
 
@@ -298,7 +298,7 @@ describe('appStore actions', () => {
 	describe('deleteItem', () => {
 		it('removes an item from the store', () => {
 			const item = createTestItem();
-			appStore.set(createTestState({ items: [item] }));
+			appStore.replaceState(createTestState({ items: [item] }));
 
 			appStore.deleteItem('item1');
 
@@ -310,7 +310,7 @@ describe('appStore actions', () => {
 	describe('createBorrowRequest', () => {
 		it('creates a borrow request and notification', () => {
 			const item = createTestItem({ lenderId: 'user2' });
-			appStore.set(createTestState({ items: [item] }));
+			appStore.replaceState(createTestState({ items: [item] }));
 
 			const request: BorrowRequest = {
 				id: 'req1',
@@ -333,8 +333,8 @@ describe('appStore actions', () => {
 		});
 	});
 
-	describe('updateBorrowRequest', () => {
-		it('updates request status and creates notification on approval', () => {
+	describe('approveRequest / denyRequest', () => {
+		it('approves a pending request, reserves the item, and notifies the borrower', () => {
 			const item = createTestItem({ lenderId: 'user2' });
 			const request: BorrowRequest = {
 				id: 'req1',
@@ -346,12 +346,14 @@ describe('appStore actions', () => {
 				status: 'pending',
 				createdAt: new Date().toISOString()
 			};
-			appStore.set(createTestState({ items: [item], borrowRequests: [request] }));
+			appStore.replaceState(createTestState({ items: [item], borrowRequests: [request] }));
 
-			appStore.updateBorrowRequest('req1', { status: 'approved' });
+			const result = appStore.approveRequest('req1');
 
+			expect(result.ok).toBe(true);
 			const state = get(appStore);
 			expect(state.borrowRequests[0].status).toBe('approved');
+			expect(state.items[0].available).toBe(false);
 			expect(state.notifications).toHaveLength(1);
 			expect(state.notifications[0].type).toBe('request-approved');
 			expect(state.notifications[0].userId).toBe('user1');
@@ -369,11 +371,13 @@ describe('appStore actions', () => {
 				status: 'pending',
 				createdAt: new Date().toISOString()
 			};
-			appStore.set(createTestState({ items: [item], borrowRequests: [request] }));
+			appStore.replaceState(createTestState({ items: [item], borrowRequests: [request] }));
 
-			appStore.updateBorrowRequest('req1', { status: 'denied' });
+			const result = appStore.denyRequest('req1');
 
+			expect(result.ok).toBe(true);
 			const state = get(appStore);
+			expect(state.borrowRequests[0].status).toBe('denied');
 			expect(state.notifications[0].type).toBe('request-denied');
 		});
 	});
@@ -391,7 +395,7 @@ describe('appStore actions', () => {
 				status: 'active',
 				createdAt: new Date().toISOString()
 			};
-			appStore.set(createTestState({ items: [item], borrowRequests: [request] }));
+			appStore.replaceState(createTestState({ items: [item], borrowRequests: [request] }));
 
 			appStore.completeBorrow('req1', 5, 'Great item!');
 
@@ -415,7 +419,7 @@ describe('appStore actions', () => {
 				status: 'active',
 				createdAt: new Date().toISOString()
 			};
-			appStore.set(createTestState({ items: [item], borrowRequests: [request] }));
+			appStore.replaceState(createTestState({ items: [item], borrowRequests: [request] }));
 
 			appStore.completeBorrow('req1', 5, 'Perfect!');
 
@@ -438,7 +442,7 @@ describe('appStore actions', () => {
 				status: 'pending',
 				createdAt: new Date().toISOString()
 			};
-			appStore.set(createTestState({ items: [item], borrowRequests: [request] }));
+			appStore.replaceState(createTestState({ items: [item], borrowRequests: [request] }));
 
 			appStore.nudgeRequest('req1');
 
@@ -464,7 +468,7 @@ describe('appStore actions', () => {
 		});
 
 		it('adds item to tag', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				tags: [{ id: 'tag1', name: 'Test Tag', createdBy: 'user1', itemIds: [] }]
 			}));
 
@@ -475,7 +479,7 @@ describe('appStore actions', () => {
 		});
 
 		it('removes item from tag', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				tags: [{ id: 'tag1', name: 'Test Tag', createdBy: 'user1', itemIds: ['item1', 'item2'] }]
 			}));
 
@@ -487,7 +491,7 @@ describe('appStore actions', () => {
 		});
 
 		it('does not add duplicate items to tag', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				tags: [{ id: 'tag1', name: 'Test Tag', createdBy: 'user1', itemIds: ['item1'] }]
 			}));
 
@@ -510,7 +514,7 @@ describe('appStore actions', () => {
 		});
 
 		it('accepts friend request and adds to friend lists', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				friendRequests: [{
 					id: 'freq1',
 					fromUserId: 'user3',
@@ -532,7 +536,7 @@ describe('appStore actions', () => {
 		});
 
 		it('declines friend request', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				friendRequests: [{
 					id: 'freq1',
 					fromUserId: 'user3',
@@ -567,7 +571,7 @@ describe('appStore actions', () => {
 
 	describe('notification actions', () => {
 		it('marks notification as read', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				notifications: [{
 					id: 'notif1',
 					userId: 'user1',
@@ -586,7 +590,7 @@ describe('appStore actions', () => {
 		});
 
 		it('marks all notifications as read for user', () => {
-			appStore.set(createTestState({
+			appStore.replaceState(createTestState({
 				notifications: [
 					{ id: 'notif1', userId: 'user1', type: 'borrow-request', title: 'Test 1', message: 'Msg', read: false, createdAt: new Date().toISOString() },
 					{ id: 'notif2', userId: 'user1', type: 'borrow-request', title: 'Test 2', message: 'Msg', read: false, createdAt: new Date().toISOString() },
@@ -629,7 +633,7 @@ describe('derived stores', () => {
 			createdAt: new Date().toISOString()
 		};
 
-		appStore.set(createTestState({
+		appStore.replaceState(createTestState({
 			items: [item1, item2],
 			borrowRequests: [request1, request2]
 		}));
@@ -650,7 +654,7 @@ describe('derived stores', () => {
 	it('incomingRequests returns pending requests to current user', () => {
 		// user1 has no pending incoming requests in this setup
 		// Let's update with a pending request TO user1
-		appStore.set(createTestState({
+		appStore.replaceState(createTestState({
 			items: [createTestItem({ id: 'item1', lenderId: 'user1' })],
 			borrowRequests: [{
 				id: 'req1',
